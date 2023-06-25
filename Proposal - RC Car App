@@ -1,0 +1,29 @@
+Project Proposal – Remote Controlled Car App
+
+This app allows a user to control a RC car via Bluetooth from their phone. The RC car will be built using Arduino kits available on Amazon. The app will allow the user to
+login to their account and register the product key for their RC car. Verification will take place, where a database of valid RC car product keys will be queried; if the
+product key is valid, it will be linked to the user’s account. The user can then use the app to pair their RC car via Bluetooth, and then control the RC car with their 
+phone. 
+
+An additional goal would be for the RC cars to have modular parts. Each part would have its own product key. A user would register the product key for a specific
+part, and then would be able to swap parts connected to their RC car via the app (alternatively, there could be possible functionality where the RC car could automatically
+detect which parts are connected to it).
+
+Systems:
+
+  •	User App
+      o	Login screen
+      o	Product Registration screen
+      o	My Cars screen
+      o	Controller screen
+
+  •	DataBase
+      o	Customer table
+      o	CustomerLogin table
+      o	CarKeys table
+      o	PartsKeys table
+
+  •	RC Car Kit
+      o	Based on Arduino kits available on Amazon
+      o	Connect to phone app via Bluetooth
+      o	Custom coding needed for controlling the car
