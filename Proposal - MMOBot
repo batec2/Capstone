@@ -1,0 +1,17 @@
+Synopsis:
+  This proposal is for creating a botting program that runs onto of a game and mimics human mouse movements to avoid anti-cheat systems.
+  MMOBot would give users a way to automate tasks within an game and complete ingame anti-botting features. The proposed game this bot
+  would be built for is for the mmo "Old School Runescape"
+
+General Ideas:
+  - Capture natural mouse movemements and create a model for the botting program to follow
+  - Successfully automate tasks within the game
+  - Complete Random Event/AntiBotting events
+  - Anti-player feature to prevent player reports
+  - Error correction in case of bot leaving training area
+  - Bot scheduling for auto login and auto log off
+
+Possible Technologies:
+  Front-End:
+
+  Back-End:
