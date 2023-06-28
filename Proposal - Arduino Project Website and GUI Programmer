@@ -7,6 +7,9 @@ General Ideas:
   - Website
   - Arduino programming GUI
   - App to control arduino
+  - Test code behaviour before loading into arduino
+  - Visual representation of components 
+  - Ability to post projects
 
 Possible Technologies:
   Front-End:
@@ -16,3 +19,5 @@ Possible Technologies:
   Back-End:
     - SQL/MySQL/SQL Server/Postgres
     - NoSQL/MongoDB
+  App:
+    - Java/Kotlin
