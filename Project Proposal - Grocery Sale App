@@ -1,0 +1,33 @@
+Project Proposal – Grocery Sale App
+
+This app allows a user to search sales at nearby grocery stores for the lowest prices. Items that are searched will display the current sale prices at the nearby stores, 
+and highlight the lowest available price. Users can create a shopping list of items, and the list will automatically find the stores with the lowest prices. Users can
+also select a nearby store and view the items at that store that are the lowest price in a search area. Users can select a sequence of stores, and their grocery list will
+update with the lowest prices within the selected sequence.
+
+The sale prices for items will be gathered from store websites and online flyers. The prices will need to be stored in a DataBase. There will have to be some kind of 
+automated update, either daily or weekly, where new sale prices are added. The normal non-sale price of an item should be dsiplayed, and the record lowest price of an
+item should also be displayed. If a sale has a set time period, the start and end dates of the sale should be displayed.
+
+Extra goals: generate a graph for each item, displaying the historical prices over a period of time. Could be filtered for just a single store, or for a range of stores.
+
+Systems:
+
+  •	User App
+      o	Login screen
+      o	Search screen
+      o	Item screen
+      o	Grocery List screen
+      o Store Search Map screen
+
+  •	DataBase
+      o	User table
+      o	UserLogin table
+      o	Store table
+      o	Items table
+
+  •	Web scraper
+      o Will require some kind of bot that scrapes specific web pages for prices.
+      o Prices will be gathered for items, and then pushed to the DataBase.
+      o Need some kind of code to determine if a price update is necessary or not.
+
