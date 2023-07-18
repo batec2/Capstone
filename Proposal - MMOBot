@@ -15,6 +15,10 @@ Possible Technologies:
   Front-End:
 
   Back-End:
+Bot Abilities:
+  - Following Agility Course
+  - Dismissing ingame Random Events/Ignoring
+  - Picking up items
 
 Natural Mouse Movements:
   - Record mouse movements of agility training lap 
@@ -29,11 +33,16 @@ Random Events:
   - Disruptions (person walks in)
   - Tabbing out
   - Loss of concentration
-  - Tiredness(intentional ineffiecency)
+  - Intentional ineffiecency
 
-Automatic Preson Scheduling(Imitating a real person daily life):
+Automatic Scheduling(Imitating a real persons daily life):
   - Login/Logout
   - Sleep cycle
   - Work/School
   - Meal Times
   - Break Periods
+
+Failure Correction:
+  - Leaving training area
+  - Avoiding bot behaviours(walking in to walls/Clicking on invalid Areas)
+  - Fail safes for when situation unrecoverable(Logging out/Teleporting Out)
