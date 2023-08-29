@@ -14,13 +14,13 @@
   - Bot scheduling for auto login and auto log off
 
 ### Possible Technologies:
-  Front-End:
-  Javascript,CSS,HTML
-  Vuejs(https://vuejs.org/)
-  Back-End:
-  Electron(https://www.electronjs.org/) - For javascript based desktop app
-  nodeJS(https://nodejs.org/en)
-  nutjs(https://nutjs.dev/) - For desktop automation
+  - Front-End:
+    - Javascript,CSS,HTML
+    - Vuejs(https://vuejs.org/)
+  - Back-End:
+    - Electron(https://www.electronjs.org/) - For javascript based desktop app
+    - nodeJS(https://nodejs.org/en)
+    - nutjs(https://nutjs.dev/) - For desktop automation
 
 ## Bot General Ideas  
 ### Bot Abilities:
