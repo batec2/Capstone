@@ -1,4 +1,4 @@
-#Runescape Bot
+# Runescape Bot
 ## Overview
 ### Synopsis:
   This proposal is for creating a botting program that runs onto of a game and mimics human mouse movements to avoid anti-cheat systems.
