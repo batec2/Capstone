@@ -19,10 +19,11 @@
 <img src = "/Screenshots/ClickBoxExample1.png" width="200" height="200"><img src = "/Screenshots/ClickBoxExample2.png" width="200" height="200"><img src = "/Screenshots/DoubleClickBoxExample.png" width="200" height="200">
 ### Overall Goals:
   - Capture natural mouse movemements and create a model for the botting program to follow
-  - Successfully automate tasks within the game
+  - Successfully automate tasks within the game(Agility)
   - Complete Random Event/AntiBotting events
   - Error correction in case of bot leaving training area
   - Bot scheduling for auto login and auto log off
+<img src = "/Screenshots/ExampleRoute.png" width = "400" height ="400">
 
 ### Possible Technologies:
   #### Front-End:
