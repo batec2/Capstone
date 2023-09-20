@@ -16,7 +16,7 @@
     - Limited Controls
       - Controls limited to click-to-move and simple keyboard shortcuts
       - Game is playable through the use of only mouse
-![](/Screenshots/ClickBoxExample1.png)|![](/Screenshots/ClickBoxExample2.png)|![](/Screenshots/DoubleClickBoxExample.png)
+<img src = "/Screenshots/ClickBoxExample1.png" width="200" height="200"><img src = "/Screenshots/ClickBoxExample2.png" width="200" height="200"><img src = "/Screenshots/DoubleClickBoxExample.png" width="200" height="200">
 ### Overall Goals:
   - Capture natural mouse movemements and create a model for the botting program to follow
   - Successfully automate tasks within the game
