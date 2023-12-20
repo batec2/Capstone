@@ -9,10 +9,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^26.2.4"
+    "electron": "^28.0.0"
   },
   "dependencies": {
-    "@nut-tree/nut-js": "^3.1.2",
-    "@techstark/opencv-js": "^4.8.0-release.10"
+    "electron-overlay-window": "^3.3.0"
   }
 }
