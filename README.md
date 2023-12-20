@@ -1,4 +1,19 @@
 # Runescape Bot
+## Requirements
+- Node.JS 18.16.1 
+  - ```nvm install v18.16.1```
+  - ```nvm use v18.16.1```
+  - Problems with newer versions (https://github.com/tensorflow/tfjs/issues/7793)
+- Node Version Manager(Recommended): 
+  - https://github.com/nvm-sh/nvm
+## How to Run
+### Install Packages:
+```npm install```
+### Run Program
+```npm start```
+### End Program
+```Ctrl + c```
+
 ## Overview
 ### Synopsis:
   This proposal is for creating a botting program that runs onto of a game and mimics human mouse movements to avoid anti-cheat systems.
