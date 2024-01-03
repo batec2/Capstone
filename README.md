@@ -4,6 +4,7 @@
   - ```nvm install v18.16.1```
   - ```nvm use v18.16.1```
   - Problems with newer versions (https://github.com/tensorflow/tfjs/issues/7793)
+- Python Version 3.11.5
 - Node Version Manager(Recommended): 
   - https://github.com/nvm-sh/nvm
 ## How to Run
