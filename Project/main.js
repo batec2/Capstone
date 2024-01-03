@@ -31,7 +31,7 @@ const createWindow = () => {
 		'RuneLite',
 	)
 }
-
+/*
 const modelPath = './agility_web_model/model.json';
 const handler = tf.io.fileSystem(modelPath);
 const image = fs.readFileSync('D:/Github/Capstone/Project/opencvData/Agility/images/test/2023-12-23_02-02-30.png');
@@ -42,13 +42,11 @@ const resizedTensor = tf.image
 //console.log(resizedTensor);
 	.div(255)
 	.reshape([1,3,640,640]);
-
-//const stuff = resizedTensor.reshape(640,640,3);
-
-tf.node.encodePng(resizedTensor,3).then((imageNew)=>{
-	fs.writeFileSync('D:/Github/Capstone/Project/redone.png',imageNew);
-})
-	/*
+	//const stuff = resizedTensor.reshape(640,640,3);
+	
+	tf.node.encodePng(resizedTensor,3).then((imageNew)=>{
+		fs.writeFileSync('D:/Github/Capstone/Project/redone.png',imageNew);
+	})
 	*/
 
 //0->3: boxes 4: scores 5: class_detect 
