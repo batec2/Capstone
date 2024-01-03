@@ -1,13 +1,16 @@
-const electron = require('electron');
+const mouseBox = document.getElementById('mouseBox');
 
-electron.ipcRenderer.on('focus-change', (e, state) => {
-    document.getElementById('text1').textContent = (state) ? ' (overlay is clickable) ' : 'clicks go through overlay'
-});
-
-electron.ipcRenderer.on('visibility-change', (e, state) => {
-    if (document.body.style.display) {
-        document.body.style.display = null
-    } else {
-        document.body.style.display = 'none'	
+const func = async () => {
+    while(true){
+        const response = await window.mouseInfo.mouseLocation();
+        moveMouseBox(response.x-10,response.y-10);
+        console.log(response);
     }
-});
+}
+
+function moveMouseBox(x_pos, y_pos) {
+    mouseBox.style.left = x_pos+'px';
+    mouseBox.style.top = y_pos+'px';
+}
+
+func();
