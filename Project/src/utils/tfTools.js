@@ -1,13 +1,18 @@
 import * as tf from '@tensorflow/tfjs-node';
 import * as fs from 'node:fs';
 
-function getTensor(location,rank){
+function getTensorFromImageData(imageData,rank){
+    const image = tf.browser.fromPixels(imageData,rank);
+    return resizeTensor(image);
+}
+
+function getTensorFromFile(location,rank){
     const image = imageToTensor(location,rank);
     return resizeTensor(image);
 }
 
 function imageToTensor(location,rank){
-    const image = fs.readFileSync('./2024-01-05_14-39-15.png');
+    const image = fs.readFileSync(location);
     return tf.node.decodePng(image,rank);
 }
 
@@ -26,4 +31,4 @@ function drawImage(tensor){
     });
 }
 
-export {getTensor};
+export {getTensorFromFile,getTensorFromImageData};

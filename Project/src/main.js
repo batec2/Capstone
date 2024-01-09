@@ -4,6 +4,8 @@ import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
 //for const {} = ...
 import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
+import * as tfTools from './utils/tfTools.js'
+
 
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -26,7 +28,10 @@ const createWindow = () => {
 Usually app.on('ready',()=>{createWindow}) is used to listen to events from  node
 */
 app.whenReady().then(() => {
-    ipcMain.on('getImage',(event,image)=>console.log(image));
+    ipcMain.on('getImage',(event,image)=>{
+        const tensor = tfTools.getTensorFromImageData(image);
+        console.log(tensor);
+    });
     createWindow();
 });
 
