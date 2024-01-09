@@ -1,35 +1,57 @@
-import {app, BrowserWindow,screen, ipcMain} from 'electron';
+import {app, BrowserWindow, ipcMain, desktopCapturer} from 'electron';
 import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
-import {path} from 'node:path';
-import * as tf from '@tensorflow/tfjs-node';
+//https://stackoverflow.com/questions/41058569/what-is-the-difference-between-const-and-const-in-javascript
+//for const {} = ...
+import * as path from 'node:path';//gets the path current path from node
+import {fileURLToPath} from 'url';
 
+//ES6 module does not have access to __dirname and __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let win;
 const createWindow = () => {
-	const win = new BrowserWindow({
-		width: 400,
-		height: 300,
-		webPreferences: {
-			preload: path.join(__dirname, 'preload.js'),
-			nodeIntegration: true,
-			contextIsolation: true
-		},
-		...OVERLAY_WINDOW_OPTS
-	});
-
-	win.loadFile('index.html');
-
-	// NOTE: if you close Dev Tools overlay window will lose transparency
-	win.webContents.openDevTools({ mode: 'detach', activate: false });
-
-	//https://github.com/SnosMe/electron-overlay-window/blob/master/src/demo/electron-demo.ts
-	//for demo of overlay
-	OverlayController.attachByTitle(
-		win,
-		'RuneLite',
-	)
-}
-
-
+    win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            //_dirname is the path to the current script
+            //path.join creates a path by joining the root path with preload.js
+            preload: path.join(__dirname,'preload.js'),
+        }
+    });
+    win.loadFile('index.html');
+    }
+/*
+Usually app.on('ready',()=>{createWindow}) is used to listen to events from  node
+*/
 app.whenReady().then(() => {
-	ipcMain.handle('mouseLocation',()=>screen.getCursorScreenPoint());
-  	createWindow();	
+    ipcMain.on('getImage',(event,image)=>console.log(image));
+    createWindow();
+});
+
+desktopCapturer.getSources({ types: ['window'] }).then((sources,reject) => {
+    if(reject){
+        console.log('---Error at getSources');
+        console.log(reject);
+        return;
+    }
+    for (const source of sources) {
+        if (source.name === 'RuneLite') {
+            win.webContents.send('SET_SOURCE', source.id);
+            console.log(source.id);
+            return;
+        }
+    }
 })
+
+/*
+listens for 'window-all-closed' event and quits application when all windows
+are gone 
+*/
+app.on('window-all-closed',()=>{
+    if(process.platform !== 'darwin'){//Checks if the platform is not MacOS
+        console.log("I'm Quitting Now, Goodbye!");
+        app.quit();
+    }
+});

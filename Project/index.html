@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <title>Hello from Electron renderer!</title>
+  </head>
+  <body>
+    <div>
+      <video id="video"></video>
+    </div>
+    <div>
+      <button id="butt">Button</button>
+    </div>
+    <div>
+      <canvas id="testCanvas" height="864" width="864"></canvas>
+    </div>
+  </body>
+  <script src="./src/renderer.js"></script>
+</html>
