@@ -2,10 +2,10 @@ import * as tf from '@tensorflow/tfjs-node';
 
 function getPrediction(stream){
     //const modelLocation = 'D:/Github/yolov7/runs/train/trainingV1/exp7/weights/tf/agility_web_model/model.json';
-    const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model.json';
+    const modelLocation = '../Project/model/yolov7_agility/weights/tf/agility_web_model/model.json';
     const handler = tf.io.fileSystem(modelLocation);
     tf.loadGraphModel(handler).then((loaded)=>{
-        loaded.executeAsync(tensorVideo).then((output)=>{
+        loaded.executeAsync(stream).then((output)=>{
             output.array().then((outputs)=>{
                 console.log(outputs[0].length);
                 for(let i = 0;i<outputs[0].length;i++){
@@ -25,3 +25,5 @@ function getPrediction(stream){
         console.log(reject);
     });
 }
+
+export {getPrediction};

@@ -4,8 +4,9 @@ import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
 //for const {} = ...
 import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
-import * as tfTools from './utils/tfTools.js'
-
+import * as tfTools from './utils/tfTools.js';
+import { getPrediction } from './utils/tfModel.js';
+import * as tf from '@tensorflow/tfjs-node';
 
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -23,14 +24,21 @@ const createWindow = () => {
         }
     });
     win.loadFile('index.html');
+    win.webContents.openDevTools({ mode: 'detach', activate: false });
     }
 /*
 Usually app.on('ready',()=>{createWindow}) is used to listen to events from  node
 */
 app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
-        const tensor = tfTools.getTensorFromImageData(image);
-        console.log(tensor);
+        //console.log(Uint8Array.from(image));
+        const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
+        const tensor = tfTools.getTensorFromImageData(imageObject,3);
+        //console.log(tensor.as3D(864,864,3));
+        //tfTools.saveImage(tensor.as3D(864,864,3));
+        tf.browser.toPixels(tensor.as3D(864,864,3)).then((thing)=>{
+            win.webContents.send('Return Image',thing);
+        })
     });
     createWindow();
 });
@@ -44,7 +52,6 @@ desktopCapturer.getSources({ types: ['window'] }).then((sources,reject) => {
     for (const source of sources) {
         if (source.name === 'RuneLite') {
             win.webContents.send('SET_SOURCE', source.id);
-            console.log(source.id);
             return;
         }
     }
@@ -60,3 +67,4 @@ app.on('window-all-closed',()=>{
         app.quit();
     }
 });
+
