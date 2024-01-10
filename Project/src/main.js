@@ -32,13 +32,24 @@ Usually app.on('ready',()=>{createWindow}) is used to listen to events from  nod
 app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
         //console.log(Uint8Array.from(image));
+        /*
+        win.webContents.send('Return Image',image);
+        */
         const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
-        const tensor = tfTools.getTensorFromImageData(imageObject,3);
-        //console.log(tensor.as3D(864,864,3));
-        //tfTools.saveImage(tensor.as3D(864,864,3));
-        tf.browser.toPixels(tensor.as3D(864,864,3)).then((thing)=>{
-            win.webContents.send('Return Image',thing);
-        })
+        tf.tidy(()=>{
+            const tensor = tfTools.getTensorFromImageData(imageObject,3);
+            //console.log(tensor);
+            //console.log(tensor.as3D(864,864,3));
+            //tfTools.saveImage(tensor.as3D(864,864,3));
+            tf.browser.toPixels(tensor.as3D(864,864,3)).then((thing)=>{
+                win.webContents.send('Return Image',thing);
+                //tf.dispose(tensor);
+            });
+            
+        });
+        console.log('numBytes : ' + tf.memory().numBytes);
+        console.log('numTensors (outside tidy): ' + tf.memory().numTensors);
+        console.log('numDataBuffers : ' + tf.memory().numDataBuffers);
     });
     createWindow();
 });

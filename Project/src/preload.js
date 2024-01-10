@@ -10,7 +10,8 @@ contextBridge.exposeInMainWorld('api', {
 	resetImage: ()=> resetImage(),
 })
 
-let globalStream;
+let videoTrack;
+let imageCapture;
 
 ipcRenderer.on('SET_SOURCE', async (event, sourceId) => {
 	try {
@@ -27,7 +28,8 @@ ipcRenderer.on('SET_SOURCE', async (event, sourceId) => {
 			}
 		}
 		})
-		globalStream = stream;
+		videoTrack = stream.getVideoTracks()[0];
+		imageCapture = new ImageCapture(videoTrack);
 		handleStream(stream);
 	} catch (e) {
 		handleError(e);
@@ -35,7 +37,7 @@ ipcRenderer.on('SET_SOURCE', async (event, sourceId) => {
 })
 
 ipcRenderer.on('Return Image',async (event,image)=>{
-	console.log(image);
+	//console.log(image);
 	var idata = new ImageData(image,864,864);
 	const canvas = document.getElementById('testCanvas2');
 	const ctx = canvas.getContext("2d",{ willReadFrequently: true });
@@ -48,12 +50,12 @@ function handleStream (stream) {
 	video.onloadedmetadata = (e) => video.play()
 }
 
+
 function resetImage () {
-	console.log('here');
-	let imageCapture = new ImageCapture(globalStream.getTracks()[0]);
+	//console.log('here');
 	imageCapture.grabFrame()
 	.then(imageBitmap => {
-		console.log(imageBitmap);
+		//console.log(imageBitmap);
 		const canvas = document.getElementById('testCanvas');
 		const ctx = canvas.getContext("2d",{ willReadFrequently: true });
 		ctx.drawImage(imageBitmap,0,0,);
@@ -62,6 +64,8 @@ function resetImage () {
 	})
 	.catch((err)=>console.log(err));
 }
+
+setInterval(resetImage,50);
 
 function handleError (e) {
   	console.log(e)	
