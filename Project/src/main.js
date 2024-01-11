@@ -6,7 +6,7 @@ import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
 import * as tfTools from './utils/tfTools.js';
 import { getPrediction } from './utils/tfModel.js';
-import * as tf from '@tensorflow/tfjs-node-gpu';
+import * as tf from '@tensorflow/tfjs-node';
 
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -24,8 +24,9 @@ const createWindow = () => {
         }
     });
     win.loadFile('index.html');
-    win.webContents.openDevTools({ mode: 'detach', activate: false });
+    //win.webContents.openDevTools({ mode: 'detach', activate: false });
     }
+
 /*
 Usually app.on('ready',()=>{createWindow}) is used to listen to events from  node
 */
@@ -35,17 +36,22 @@ app.whenReady().then(() => {
         const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
         //console.log(imageObject);
         //Creates a scope and frees any tensor not returned
-        tf.tidy(()=>{
+        //tf.tidy(()=>{
             const tensor = tfTools.getTensorFromImageData(imageObject,3);
-            //console.log(tensor);
-            tf.browser.toPixels(tensor).then((thing)=>{
-                 win.webContents.send('Return Image',thing);
-            }); 
-        });
+            const resized = tfTools.resizeTensor(tensor)
+            //console.log(resized);
+            getPrediction(resized);
+            
+            // tf.browser.toPixels(tensor).then((thing)=>{
+            //      win.webContents.send('Return Image',thing);
+            // }); 
+        //});
+        getPrediction(resized);
     });
     createWindow();
 });
 
+    
 desktopCapturer.getSources({ types: ['window'] }).then((sources,reject) => {
     if(reject){
         console.log('---Error at getSources');

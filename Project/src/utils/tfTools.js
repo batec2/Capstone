@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs-node-gpu';
+import * as tf from '@tensorflow/tfjs-node';
 import * as fs from 'node:fs';
 
 function getTensorFromImageData(imageData,rank){

@@ -1,8 +1,8 @@
-import * as tf from '@tensorflow/tfjs-node-gpu';
+import * as tf from '@tensorflow/tfjs-node';
 
-function getPrediction(stream){
+function getPrediction(stream,model){
     //const modelLocation = 'D:/Github/yolov7/runs/train/trainingV1/exp7/weights/tf/agility_web_model/model.json';
-    const modelLocation = '../Project/model/yolov7_agility/weights/tf/agility_web_model/model.json';
+    const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model.json';
     const handler = tf.io.fileSystem(modelLocation);
     tf.loadGraphModel(handler).then((loaded)=>{
         loaded.executeAsync(stream).then((output)=>{
