@@ -1,9 +1,10 @@
-import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node-gpu';
 import * as fs from 'node:fs';
 
 function getTensorFromImageData(imageData,rank){
     const image = tf.browser.fromPixels(imageData,rank);
-    return resizeTensor(image);
+    // return resizeTensor(image);
+    return image;
 }
 
 function getTensorFromFile(location,rank){

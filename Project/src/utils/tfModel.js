@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node-gpu';
 
 function getPrediction(stream){
     //const modelLocation = 'D:/Github/yolov7/runs/train/trainingV1/exp7/weights/tf/agility_web_model/model.json';

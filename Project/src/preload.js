@@ -31,6 +31,7 @@ ipcRenderer.on('SET_SOURCE', async (event, sourceId) => {
 		videoTrack = stream.getVideoTracks()[0];
 		imageCapture = new ImageCapture(videoTrack);
 		handleStream(stream);
+		//setInterval(resetImage,50);
 	} catch (e) {
 		handleError(e);
 	}
@@ -50,11 +51,14 @@ function handleStream (stream) {
 	video.onloadedmetadata = (e) => video.play()
 }
 
+function handleError (e) {
+	  console.log(e)	
+}
 
 function resetImage () {
 	//console.log('here');
 	imageCapture.grabFrame()
-	.then(imageBitmap => {
+	.then((imageBitmap) => {
 		//console.log(imageBitmap);
 		const canvas = document.getElementById('testCanvas');
 		const ctx = canvas.getContext("2d",{ willReadFrequently: true });
@@ -62,11 +66,8 @@ function resetImage () {
 		const imageData = ctx.getImageData(0,0,864,864);
 		ipcRenderer.send('getImage',imageData.data);
 	})
-	.catch((err)=>console.log(err));
-}
-
-setInterval(resetImage,50);
-
-function handleError (e) {
-  	console.log(e)	
+	.catch((err)=>{
+		console.log('---Error at resetImage---');
+		console.log(err);
+	});
 }

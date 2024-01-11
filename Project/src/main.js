@@ -6,7 +6,7 @@ import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
 import * as tfTools from './utils/tfTools.js';
 import { getPrediction } from './utils/tfModel.js';
-import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node-gpu';
 
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -31,25 +31,17 @@ Usually app.on('ready',()=>{createWindow}) is used to listen to events from  nod
 */
 app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
-        //console.log(Uint8Array.from(image));
-        /*
-        win.webContents.send('Return Image',image);
-        */
+        //turns image taken from front end and turns it into a pseudo ImageData Object
         const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
+        //console.log(imageObject);
+        //Creates a scope and frees any tensor not returned
         tf.tidy(()=>{
             const tensor = tfTools.getTensorFromImageData(imageObject,3);
             //console.log(tensor);
-            //console.log(tensor.as3D(864,864,3));
-            //tfTools.saveImage(tensor.as3D(864,864,3));
-            tf.browser.toPixels(tensor.as3D(864,864,3)).then((thing)=>{
-                win.webContents.send('Return Image',thing);
-                //tf.dispose(tensor);
-            });
-            
+            tf.browser.toPixels(tensor).then((thing)=>{
+                 win.webContents.send('Return Image',thing);
+            }); 
         });
-        console.log('numBytes : ' + tf.memory().numBytes);
-        console.log('numTensors (outside tidy): ' + tf.memory().numTensors);
-        console.log('numDataBuffers : ' + tf.memory().numDataBuffers);
     });
     createWindow();
 });
