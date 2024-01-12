@@ -31,7 +31,7 @@ ipcRenderer.on('SET_SOURCE', async (event, sourceId) => {
 		videoTrack = stream.getVideoTracks()[0];
 		imageCapture = new ImageCapture(videoTrack);
 		handleStream(stream);
-		//setInterval(resetImage,50);
+		setInterval(resetImage,100);
 	} catch (e) {
 		handleError(e);
 	}

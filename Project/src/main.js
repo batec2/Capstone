@@ -34,11 +34,9 @@ app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
         //turns image taken from front end and turns it into a pseudo ImageData Object
         const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
-        //console.log(imageObject);
-        //Creates a scope and frees any tensor not returned
         const tensor = tfTools.getTensorFromImageData(imageObject,3);
         const resized = tfTools.resizeTensor(tensor)
-        //Does not work through 
+        tensor.dispose();
         getPrediction(resized);
         // tf.browser.toPixels(tensor).then((thing)=>{
         //      win.webContents.send('Return Image',thing);

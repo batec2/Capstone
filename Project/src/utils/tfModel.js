@@ -1,11 +1,12 @@
 import * as tf from '@tensorflow/tfjs-node-gpu';
 
-function getPrediction(stream){
+function getPrediction(stream,model){
     //const modelLocation = 'D:/Github/yolov7/runs/train/trainingV1/exp7/weights/tf/agility_web_model/model.json';
     const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model.json';
     const handler = tf.io.fileSystem(modelLocation);
     tf.loadGraphModel(handler).then((loaded)=>{
         loaded.executeAsync(stream).then((output)=>{
+            stream.dispose();
             output.array().then((outputs)=>{
                 console.log(outputs[0].length);
                 for(let i = 0;i<outputs[0].length;i++){
@@ -14,6 +15,8 @@ function getPrediction(stream){
                     }
                 }
             })
+            output.dispose();
+            console.log(tf.memory());
         })
         .catch((reject)=>{
             console.log('---Error At Execute---');
