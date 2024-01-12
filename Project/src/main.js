@@ -6,7 +6,7 @@ import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
 import * as tfTools from './utils/tfTools.js';
 import { getPrediction } from './utils/tfModel.js';
-import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node-gpu';
 
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -36,17 +36,13 @@ app.whenReady().then(() => {
         const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
         //console.log(imageObject);
         //Creates a scope and frees any tensor not returned
-        //tf.tidy(()=>{
-            const tensor = tfTools.getTensorFromImageData(imageObject,3);
-            const resized = tfTools.resizeTensor(tensor)
-            //console.log(resized);
-            getPrediction(resized);
-            
-            // tf.browser.toPixels(tensor).then((thing)=>{
-            //      win.webContents.send('Return Image',thing);
-            // }); 
-        //});
+        const tensor = tfTools.getTensorFromImageData(imageObject,3);
+        const resized = tfTools.resizeTensor(tensor)
+        //Does not work through 
         getPrediction(resized);
+        // tf.browser.toPixels(tensor).then((thing)=>{
+        //      win.webContents.send('Return Image',thing);
+        // }); 
     });
     createWindow();
 });
