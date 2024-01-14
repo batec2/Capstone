@@ -33,7 +33,7 @@ app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
         if(isWorking===false){
             console.log('its sending a image');
-            modelWorker.postMessage('message',image);
+            modelWorker.postMessage(image);
             isWorking = true;
         }
     });
@@ -64,4 +64,8 @@ app.on('window-all-closed',()=>{
 });
 
 
-modelWorker.on('finished',()=>isWorking=false);
+modelWorker.on('message',(mes)=>{
+    if(mes==='finished'){
+        isWorking=false;
+    }
+});

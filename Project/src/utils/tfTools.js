@@ -2,9 +2,9 @@ import * as tf from '@tensorflow/tfjs-node-gpu';
 import * as fs from 'node:fs';
 
 function getTensorFromImageData(imageData,rank){
-    const image = tf.browser.fromPixels(imageData,rank);
-    // return resizeTensor(image);
-    return image;
+    return tf.tidy(()=>{
+        return tf.browser.fromPixels(imageData,rank);
+    });
 }
 
 function getTensorFromFile(location,rank){
@@ -18,12 +18,15 @@ function imageToTensor(location,rank){
 }
 
 function resizeTensor(image){
-    return tf.tidy(()=>{
-        return tf.image.resizeBilinear(image,[864,864])//resizing tensor to 864*864
-        .div(255.0)//normalizing tensor to floats between 0-1                  
-        .transpose([2, 0, 1])
-        .expandDims(0); 
-    });
+    const input = tf.tidy(()=>{
+            const img = tf.image//image is [864,864,3] rank of 3 (3d array)
+                .resizeBilinear(image,[864,864])//resizes to a 864x864 (shouldn't need to do this tho since input is already 864x864, but ok?)
+                .div(255.0)//normalizing tensor to floats between 0-1                  
+                .transpose([2, 0, 1])//no idea, something about turning rows into columns?
+                .expandDims(0);//it expands dimensions?
+            return img;//[1,3,864,864] rank of 4 (4d array) to match model requirements
+        });
+    return input;
 }
 
 function saveImage(tensor){

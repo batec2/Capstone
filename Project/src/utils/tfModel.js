@@ -6,19 +6,20 @@ const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model
 const handler = tf.io.fileSystem(modelLocation);
 const model = await tf.loadGraphModel(handler);
 
-function getPrediction(stream){
-    model.executeAsync(stream).then((output)=>{
+async function getPrediction(stream){
+    await model.executeAsync(stream).then((output)=>{
         stream.dispose();
-        output.array().then((outputs)=>{
-            console.log(outputs[0].length);
-            for(let i = 0;i<outputs[0].length;i++){
-                if (outputs[0][i][4]>=0.80){
-                    console.log(outputs[0][i]);
+        tf.tidy(()=>{
+            output.array().then((outputs)=>{
+                console.log(outputs[0].length);
+                for(let i = 0;i<outputs[0].length;i++){
+                    if (outputs[0][i][4]>=0.80){
+                        console.log(outputs[0][i]);
+                    }
                 }
-            }
+            });
+            output.dispose();
         })
-        output.dispose();
-        console.log(tf.memory());
     })
     .catch((reject)=>{
         console.log('---Error At Execute---');
@@ -34,8 +35,11 @@ function getTensor(image){
     });
 }
 
-parentPort.on('message',(image) => {
+parentPort.on('message',async (image) => {
+    tf.engine().startScope();
     const tensor = getTensor(image);
-    getPrediction(tensor);
+    await getPrediction(tensor);
     parentPort.postMessage('finished');
+    tf.engine().endScope();
+    console.log(tf.memory());
 })
