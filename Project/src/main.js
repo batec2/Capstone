@@ -1,18 +1,18 @@
 import {app, BrowserWindow, ipcMain, desktopCapturer} from 'electron';
 import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
-//https://stackoverflow.com/questions/41058569/what-is-the-difference-between-const-and-const-in-javascript
-//for const {} = ...
+import {Worker, isMainThread, parentPort, workerData} from 'worker_threads';
+import * as utils from './utils/utils.js';
 import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
-import * as tfTools from './utils/tfTools.js';
-import { getPrediction } from './utils/tfModel.js';
-import * as tf from '@tensorflow/tfjs-node-gpu';
 
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const modelWorker = new Worker('./src/utils/tfModel.js');
 let win;
+let isWorking = false;
+
 const createWindow = () => {
     win = new BrowserWindow({
         width: 800,
@@ -25,40 +25,31 @@ const createWindow = () => {
     });
     win.loadFile('index.html');
     //win.webContents.openDevTools({ mode: 'detach', activate: false });
-    }
+}
 
-/*
-Usually app.on('ready',()=>{createWindow}) is used to listen to events from  node
-*/
+    
+
 app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
-        //turns image taken from front end and turns it into a pseudo ImageData Object
-        const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
-        const tensor = tfTools.getTensorFromImageData(imageObject,3);
-        const resized = tfTools.resizeTensor(tensor)
-        tensor.dispose();
-        getPrediction(resized);
-        // tf.browser.toPixels(tensor).then((thing)=>{
-        //      win.webContents.send('Return Image',thing);
-        // }); 
+        if(isWorking===false){
+            console.log('its sending a image');
+            modelWorker.postMessage('message',image);
+            isWorking = true;
+        }
+    });
+    ipcMain.on('start',()=>{
+        utils.getSourceId().then((sourceId)=>{
+            if(sourceId){
+                console.log(sourceId);
+                win.webContents.send('SET_SOURCE',sourceId);
+            }
+            else{
+                console.log('Could not get source');
+            }
+        });
     });
     createWindow();
 });
-
-    
-desktopCapturer.getSources({ types: ['window'] }).then((sources,reject) => {
-    if(reject){
-        console.log('---Error at getSources');
-        console.log(reject);
-        return;
-    }
-    for (const source of sources) {
-        if (source.name === 'RuneLite') {
-            win.webContents.send('SET_SOURCE', source.id);
-            return;
-        }
-    }
-})
 
 /*
 listens for 'window-all-closed' event and quits application when all windows
@@ -67,7 +58,10 @@ are gone
 app.on('window-all-closed',()=>{
     if(process.platform !== 'darwin'){//Checks if the platform is not MacOS
         console.log("I'm Quitting Now, Goodbye!");
+        modelWorker.terminate();
         app.quit();
     }
 });
 
+
+modelWorker.on('finished',()=>isWorking=false);
