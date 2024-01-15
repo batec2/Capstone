@@ -11,15 +11,18 @@ async function getPrediction(stream){
         stream.dispose();
         tf.tidy(()=>{
             output.array().then((outputs)=>{
-                console.log(outputs[0].length);
+                console.log(`amount of outputs: ${outputs[0].length}`);
+                const results = [];
                 for(let i = 0;i<outputs[0].length;i++){
                     if (outputs[0][i][4]>=0.80){
-                        console.log(outputs[0][i]);
+                        results.push(outputs[0][i]);
                     }
                 }
+                console.log(results.length);
+                parentPort.postMessage(results);
             });
             output.dispose();
-        })
+        });
     })
     .catch((reject)=>{
         console.log('---Error At Execute---');
@@ -39,7 +42,6 @@ parentPort.on('message',async (image) => {
     tf.engine().startScope();
     const tensor = getTensor(image);
     await getPrediction(tensor);
-    parentPort.postMessage('finished');
     tf.engine().endScope();
-    console.log(tf.memory());
+    //console.log(tf.memory());
 })

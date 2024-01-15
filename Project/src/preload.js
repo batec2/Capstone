@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
 	resetImage: ()=> resetImage(),
 })
 
+let globalStream;
 let videoTrack;
 let imageCapture;
 
@@ -35,6 +36,7 @@ async function set_source(sourceId)
 			}
 		}
 		})
+		globalStream = stream;
 		videoTrack = stream.getVideoTracks()[0];
 		imageCapture = new ImageCapture(videoTrack);
 		handleStream(stream);
@@ -49,7 +51,23 @@ ipcRenderer.on('Return Image',async (event,image)=>{
 	const canvas = document.getElementById('testCanvas2');
 	const ctx = canvas.getContext("2d",{ willReadFrequently: true });
 	ctx.putImageData(idata,0,0,);
-})
+});
+
+ipcRenderer.on('Send Bounding Box',async (event,results)=>{
+	console.log('its happening');
+	const canvas = document.getElementById('testCanvas2');
+	const ctx = canvas.getContext("2d");
+	ctx.fillStyle = "#FF0000";
+	results.forEach((prediction)=>{
+		ctx.fillRect(prediction[0],prediction[1], prediction[2], prediction[3]);
+	});
+});
+
+ipcRenderer.on('quit',()=>{
+	const video = document.querySelector('video');
+	video.pause();
+	globalStream.getTracks().forEach((track)=>track.stop());
+});
 
 function handleStream (stream) {
 	const video = document.querySelector('video');

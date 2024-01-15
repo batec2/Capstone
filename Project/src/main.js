@@ -64,8 +64,10 @@ app.on('window-all-closed',()=>{
 });
 
 
-modelWorker.on('message',(mes)=>{
-    if(mes==='finished'){
-        isWorking=false;
+modelWorker.on('message',(results)=>{
+    if(results){
+        //console.log(results[0][0]);
+        win.webContents.send('Send Bounding Box',results);
     }
+    isWorking = false;
 });
