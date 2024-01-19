@@ -22,3 +22,25 @@
     box-sizing: border-box; 
     pointer-events: none;
 }
+
+#video-box{
+    display: block;
+}
+
+#testCanvas2{
+    position: absolute;
+    top: 20;
+    left: 20;
+    z-index: 999; 
+}
+
+#testCanvas{
+    display: none;
+}
+
+#video-player{
+    z-index: -1;
+    position: absolute;
+    top: 20;
+    left: 20;
+}  

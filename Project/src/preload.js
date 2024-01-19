@@ -40,7 +40,7 @@ async function set_source(sourceId)
 		videoTrack = stream.getVideoTracks()[0];
 		imageCapture = new ImageCapture(videoTrack);
 		handleStream(stream);
-		setInterval(resetImage,300);
+		setInterval(resetImage,100);
 	} catch (e) {
 		handleError(e);
 	}
@@ -54,12 +54,13 @@ ipcRenderer.on('Return Image',async (event,image)=>{
 });
 
 ipcRenderer.on('Send Bounding Box',async (event,results)=>{
-	console.log('its happening');
 	const canvas = document.getElementById('testCanvas2');
 	const ctx = canvas.getContext("2d");
-	ctx.fillStyle = "#FF0000";
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.strokeStyle = "#B033FF";
+	ctx.lineWidth = 2;
 	results.forEach((prediction)=>{
-		ctx.fillRect(prediction[0],prediction[1], prediction[2], prediction[3]);
+		ctx.strokeRect(prediction[0],prediction[1], prediction[2], prediction[3]);
 	});
 });
 

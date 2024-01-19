@@ -5,3 +5,7 @@ document.getElementById('send-frame').addEventListener('click',async ()=>{
 document.getElementById('get-source').addEventListener('click',async ()=>{
     window.api.getSource();
 })
+
+const video = document.getElementById('video');
+const predictionCanvas = document.getElementById('testCanvas2');
+

@@ -8,7 +8,7 @@ function getSourceId(){
             return;
         }
         for (const source of sources) {
-            if (source.name === 'RuneLite') {
+            if (source.name === 'RuneLite'||source.name === 'RuneLite - YameteOnii') {
                 return source.id;
             }
         }
