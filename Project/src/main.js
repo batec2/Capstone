@@ -32,7 +32,6 @@ const createWindow = () => {
 app.whenReady().then(() => {
     ipcMain.on('getImage',(event,image)=>{
         if(isWorking===false){
-            console.log('its sending a image');
             modelWorker.postMessage(image);
             isWorking = true;
         }
@@ -40,7 +39,6 @@ app.whenReady().then(() => {
     ipcMain.on('start',()=>{
         utils.getSourceId().then((sourceId)=>{
             if(sourceId){
-                console.log(sourceId);
                 win.webContents.send('SET_SOURCE',sourceId);
             }
             else{
@@ -63,10 +61,12 @@ app.on('window-all-closed',()=>{
     }
 });
 
-
+/**
+ * listens for a message from worker thread, and sends the resutls to
+ * the front end to be rendered
+ */
 modelWorker.on('message',(results)=>{
     if(results){
-        //console.log(results[0][0]);
         win.webContents.send('Send Bounding Box',results);
     }
     isWorking = false;

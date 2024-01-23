@@ -14,7 +14,7 @@ async function getPrediction(stream){
                 console.log(`amount of outputs: ${outputs[0].length}`);
                 const results = [];
                 for(let i = 0;i<outputs[0].length;i++){
-                    if (outputs[0][i][4]>=0.80){
+                    if (outputs[0][i][4]>=0.90){
                         results.push(outputs[0][i]);
                     }
                 }

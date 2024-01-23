@@ -60,7 +60,11 @@ ipcRenderer.on('Send Bounding Box',async (event,results)=>{
 	ctx.strokeStyle = "#B033FF";
 	ctx.lineWidth = 2;
 	results.forEach((prediction)=>{
-		ctx.strokeRect(prediction[0],prediction[1], prediction[2], prediction[3]);
+		ctx.strokeRect(
+			prediction[0]-(prediction[2]/2),//x
+			prediction[1]-(prediction[3]/2),//y
+		 	prediction[2],//width
+			prediction[3]);//height
 	});
 });
 
