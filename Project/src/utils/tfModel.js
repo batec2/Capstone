@@ -6,6 +6,12 @@ const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model
 const handler = tf.io.fileSystem(modelLocation);
 const model = await tf.loadGraphModel(handler);
 
+const dummyInput = tf.ones(model.inputs[0].shape);
+await model.executeAsync(dummyInput).then((warmupResult) => {
+    tf.dispose(warmupResult);
+    tf.dispose(dummyInput);
+});
+
 async function getPrediction(stream){
     await model.executeAsync(stream).then((output)=>{
         stream.dispose();
@@ -28,7 +34,10 @@ async function getPrediction(stream){
         console.log('---Error At Execute---');
         console.log(reject);
     });
+    
 }
+
+
 
 function getTensor(image){
     return tf.tidy(()=>{
