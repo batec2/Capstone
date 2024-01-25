@@ -27,15 +27,22 @@ const createWindow = () => {
     //win.webContents.openDevTools({ mode: 'detach', activate: false });
 }
 
-    
-
 app.whenReady().then(() => {
+    /**
+     * Sends the image array to the worker thread to be passed into the model
+     * for inference. Sets the global isWorking thread to true to prevent
+     * more images to be sent to model before it completes inference. 
+     * @param image Uint8ClampedArray - data comes from Imagedata.data
+     */
     ipcMain.on('getImage',(event,image)=>{
         if(isWorking===false){
             modelWorker.postMessage(image);
             isWorking = true;
         }
     });
+    /**
+     * On start up this looks for the 
+     */
     ipcMain.on('start',()=>{
         utils.getSourceId().then((sourceId)=>{
             if(sourceId){
