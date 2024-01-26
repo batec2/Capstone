@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld('api', {
 	getSource: ()=> {
 		ipcRenderer.send('start');
 	},
-	resetImage: ()=> resetImage(),
+	resetImage: ()=> getImageData(),
 })
 
 ipcRenderer.on('SET_SOURCE', async (event, sourceId) => set_source(sourceId));
@@ -40,20 +40,13 @@ async function set_source(sourceId)
 		videoTrack = stream.getVideoTracks()[0];
 		imageCapture = new ImageCapture(videoTrack);
 		handleStream(stream);
-		setInterval(resetImage,100);
+		// setInterval(getImageData,100);
 	} catch (e) {
 		handleError(e);
 	}
 }
 
-ipcRenderer.on('Return Image',async (event,image)=>{
-	var idata = new ImageData(image,864,864);
-	const canvas = document.getElementById('testCanvas2');
-	const ctx = canvas.getContext("2d",{ willReadFrequently: true });
-	ctx.putImageData(idata,0,0,);
-});
-
-ipcRenderer.on('Send Bounding Box',async (event,boundingArray)=>{
+ipcRenderer.on('bounding box',(event,boundingArray)=>{
 	drawBoundingBox(boundingArray)
 });
 
@@ -71,7 +64,7 @@ function handleError (e) {
  * Takes a frame from a video track and sends it to the main thread
  * to be processed by model
  */
-function resetImage () {
+function getImageData () {
 	// takes a frame from the video stream to send to the main thread
 	imageCapture.grabFrame()
 		.then((imageBitmap) => {
@@ -111,3 +104,11 @@ function drawBoundingBox(boundingArray){
 			prediction[3]);//height
 	});
 }
+
+
+// ipcRenderer.on('Return Image',(event,image)=>{
+// 	var idata = new ImageData(image,864,864);
+// 	const canvas = document.getElementById('testCanvas2');
+// 	const ctx = canvas.getContext("2d",{ willReadFrequently: true });
+// 	ctx.putImageData(idata,0,0,);
+// });

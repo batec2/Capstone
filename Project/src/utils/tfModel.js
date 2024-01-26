@@ -7,48 +7,44 @@ const handler = tf.io.fileSystem(modelLocation);
 const model = await tf.loadGraphModel(handler);
 
 const dummyInput = tf.ones(model.inputs[0].shape);
-await model.executeAsync(dummyInput).then((warmupResult) => {
-    tf.dispose(warmupResult);
-    tf.dispose(dummyInput);
-});
+const warmupResult = model.execute(dummyInput);
+tf.dispose(warmupResult);
+tf.dispose(dummyInput);
 
-async function getPrediction(stream){
-    await model.executeAsync(stream).then((output)=>{
-        stream.dispose();
-        tf.tidy(()=>{
-            output.array().then((outputs)=>{
-                console.log(`amount of outputs: ${outputs[0].length}`);
-                const results = [];
-                for(let i = 0;i<outputs[0].length;i++){
-                    if (outputs[0][i][4]>=0.90){
-                        results.push(outputs[0][i]);
-                    }
-                }
-                console.log(results.length);
-                parentPort.postMessage(results);
-            });
-            output.dispose();
-        });
-    })
-    .catch((reject)=>{
-        console.log('---Error At Execute---');
-        console.log(reject);
-    });
-    
+/**
+ * Takes a frame from the main thread and uses the model to inference
+ * @param {} frame 
+ */
+function getPrediction(frame){
+    const output = model.execute(frame);
+    const boundingArrays = output.arraySync();
+    const results = [];
+    for(let i = 0;i<boundingArrays[0].length;i++){
+        if (boundingArrays[0][i][4]>=0.90){
+            results.push(boundingArrays[0][i]);
+        }
+    }
+    console.log(results.length);
+    parentPort.postMessage(results);
 }
 
-function getTensor(image){
+/**
+ * Takes a frame and converts to a tensor of size 864*864 for inference
+ * @param {*} frame 
+ * @returns 
+ */
+function getTensor(frame){
     return tf.tidy(()=>{
-        const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
+        const imageObject = {data:Uint8Array.from(frame), width: 864, height: 864};
         const tensor = tfTools.getTensorFromImageData(imageObject,3);
         return tfTools.resizeTensor(tensor);
     });
 }
 
-parentPort.on('message',async (image) => {
+parentPort.on('predict image',(image) => {
     tf.engine().startScope();
     const tensor = getTensor(image);
-    await getPrediction(tensor);
+    getPrediction(tensor);
     tf.engine().endScope();
     //console.log(tf.memory());
 })

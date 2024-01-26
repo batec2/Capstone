@@ -72,9 +72,6 @@ app.on('window-all-closed',()=>{
  * listens for a message from worker thread, and sends the resutls to
  * the front end to be rendered
  */
-modelWorker.on('message',(results)=>{
-    if(results){
-        win.webContents.send('Send Bounding Box',results);
-    }
-    isWorking = false;
+modelWorker.on('predict image',(results)=>{
+    win.webContents.send('bounding box',results);
 });
