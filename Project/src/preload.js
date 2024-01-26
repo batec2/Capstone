@@ -4,6 +4,10 @@
  */
 const {contextBridge, ipcRenderer} = require('electron');
 
+let globalStream;
+let videoTrack;
+let imageCapture;
+
 contextBridge.exposeInMainWorld('api', {
 	//Put things here to expose in renderer.js
 	getImage: (image) => ipcRenderer.send('getImage',image),
@@ -12,10 +16,6 @@ contextBridge.exposeInMainWorld('api', {
 	},
 	resetImage: ()=> resetImage(),
 })
-
-let globalStream;
-let videoTrack;
-let imageCapture;
 
 ipcRenderer.on('SET_SOURCE', async (event, sourceId) => set_source(sourceId));
 
@@ -53,25 +53,8 @@ ipcRenderer.on('Return Image',async (event,image)=>{
 	ctx.putImageData(idata,0,0,);
 });
 
-ipcRenderer.on('Send Bounding Box',async (event,results)=>{
-	const canvas = document.getElementById('testCanvas2');
-	const ctx = canvas.getContext("2d");
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	ctx.strokeStyle = "#B033FF";
-	ctx.lineWidth = 2;
-	results.forEach((prediction)=>{
-		ctx.strokeRect(
-			prediction[0]-(prediction[2]/2),//x
-			prediction[1]-(prediction[3]/2),//y
-		 	prediction[2],//width
-			prediction[3]);//height
-	});
-});
-
-ipcRenderer.on('quit',()=>{
-	const video = document.querySelector('video');
-	video.pause();
-	globalStream.getTracks().forEach((track)=>track.stop());
+ipcRenderer.on('Send Bounding Box',async (event,boundingArray)=>{
+	drawBoundingBox(boundingArray)
 });
 
 function handleStream (stream) {
@@ -84,17 +67,47 @@ function handleError (e) {
 	  console.log(e);
 }
 
+/**
+ * Takes a frame from a video track and sends it to the main thread
+ * to be processed by model
+ */
 function resetImage () {
+	// takes a frame from the video stream to send to the main thread
 	imageCapture.grabFrame()
-	.then((imageBitmap) => {
-		const canvas = document.getElementById('testCanvas');
-		const ctx = canvas.getContext("2d",{ willReadFrequently: true });
-		ctx.drawImage(imageBitmap,0,0,);
-		const imageData = ctx.getImageData(0,0,864,864);
-		ipcRenderer.send('getImage',imageData.data);
-	})
-	.catch((err)=>{
-		console.log('---Error at resetImage---');
-		console.log(err);
+		.then((imageBitmap) => {
+			// temporary canvas to draw image on
+			const canvas = document.getElementById('testCanvas');
+			const ctx = canvas.getContext("2d",{ willReadFrequently: true });
+			// draws image on canvas
+			ctx.drawImage(imageBitmap,0,0,);
+			// takes the imageData from the canvas
+			const imageData = ctx.getImageData(0,0,864,864);
+			// sends data in Uint8ClampedArray form to the main thread
+			ipcRenderer.send('getImage',imageData.data);
+		})
+		.catch((err)=>{
+			console.log('---Error at resetImage---');
+			console.log(err);
+		});
+}
+
+/**
+ * Takes the array of bounding boxes given by the model and draws it to a 
+ * canvas overlayed on the video stream.
+ * @param {{centerX,centerY,Width,height}[]} boundingArray 
+ */
+function drawBoundingBox(boundingArray){
+	const canvas = document.getElementById('testCanvas2');
+	const ctx = canvas.getContext("2d");
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.strokeStyle = "#B033FF";
+	ctx.lineWidth = 2;
+	// Creates a rectangle for each prediction
+	boundingArray.forEach((prediction)=>{
+		ctx.strokeRect(
+			prediction[0]-(prediction[2]/2),//x minus half of height to get top left
+			prediction[1]-(prediction[3]/2),//y
+		 	prediction[2],//width
+			prediction[3]);//height
 	});
 }

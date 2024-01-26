@@ -37,8 +37,6 @@ async function getPrediction(stream){
     
 }
 
-
-
 function getTensor(image){
     return tf.tidy(()=>{
         const imageObject = {data:Uint8Array.from(image), width: 864, height: 864};
