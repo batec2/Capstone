@@ -28,14 +28,14 @@
     display: block;
 }
 
-#testCanvas2{
+#overlay-canvas{
     position: absolute;
     top: 0;
     left: 0;
     z-index: 999; 
 }
 
-#testCanvas{
+#data-canvas{
     display: none;
 }
 

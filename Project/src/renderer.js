@@ -1,5 +1,5 @@
 document.getElementById('send-frame').addEventListener('click',async ()=>{
-    window.api.resetImage();
+    window.api.sendFrame();
 })
 
 document.getElementById('get-source').addEventListener('click',async ()=>{

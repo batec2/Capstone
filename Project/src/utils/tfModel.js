@@ -2,14 +2,25 @@ import {parentPort} from 'worker_threads';
 import * as tf from '@tensorflow/tfjs-node-gpu';
 import * as tfTools from './tfTools.js';
 
-const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model.json';
-const handler = tf.io.fileSystem(modelLocation);
-const model = await tf.loadGraphModel(handler);
 
-const dummyInput = tf.ones(model.inputs[0].shape);
-const warmupResult = model.execute(dummyInput);
-tf.dispose(warmupResult);
-tf.dispose(dummyInput);
+/**
+ * Gives the model a dummy input to 'warm' it up and get it ready for execution
+ * @param {} model 
+*/
+async function warmUpModel(){
+    const modelLocation = './model/yolov7_agility/weights/tf/agility_web_model/model.json';
+    const handler = tf.io.fileSystem(modelLocation);
+    const model = await tf.loadGraphModel(handler);
+    const dummyInput = tf.ones(model.inputs[0].shape);
+    const warmupResult = model.execute(dummyInput);
+    tf.dispose(warmupResult);
+    tf.dispose(dummyInput);
+    // parentPort.postMessage();
+    console.log('ready');
+    return model;
+}
+
+const model = await warmUpModel();
 
 /**
  * Takes a frame from the main thread and uses the model to inference
@@ -34,17 +45,21 @@ function getPrediction(frame){
  * @returns 
  */
 function getTensor(frame){
-    return tf.tidy(()=>{
-        const imageObject = {data:Uint8Array.from(frame), width: 864, height: 864};
-        const tensor = tfTools.getTensorFromImageData(imageObject,3);
-        return tfTools.resizeTensor(tensor);
-    });
+    const imageObject = {
+        data:Uint8Array.from(frame.data),
+        width: frame.width, 
+        height: frame.height};
+    console.log(imageObject.width,imageObject.height);
+    const tensor = tfTools.getTensorFromImageData(imageObject,3);
+    return tfTools.resizeTensor(tensor);
 }
 
-parentPort.on('predict image',(image) => {
+parentPort.on('message',(image) => {
     tf.engine().startScope();
     const tensor = getTensor(image);
     getPrediction(tensor);
     tf.engine().endScope();
     //console.log(tf.memory());
 })
+
+

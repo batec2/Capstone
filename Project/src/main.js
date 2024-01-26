@@ -1,17 +1,15 @@
 import {app, BrowserWindow, ipcMain, desktopCapturer} from 'electron';
 import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
-import {Worker, isMainThread, parentPort, workerData} from 'worker_threads';
+import {Worker,MessageChannel} from 'worker_threads';
 import * as utils from './utils/utils.js';
 import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
-
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const modelWorker = new Worker('./src/utils/tfModel.js');
+const {port1,port2} = new MessageChannel();
 let win;
-let isWorking = false;
 
 const createWindow = () => {
     win = new BrowserWindow({
@@ -35,10 +33,7 @@ app.whenReady().then(() => {
      * @param image Uint8ClampedArray - data comes from Imagedata.data
      */
     ipcMain.on('getImage',(event,image)=>{
-        if(isWorking===false){
             modelWorker.postMessage(image);
-            isWorking = true;
-        }
     });
     /**
      * On start up this looks for the 
@@ -72,6 +67,8 @@ app.on('window-all-closed',()=>{
  * listens for a message from worker thread, and sends the resutls to
  * the front end to be rendered
  */
-modelWorker.on('predict image',(results)=>{
-    win.webContents.send('bounding box',results);
+modelWorker.on('message',(results)=>{
+    if(results){
+        win.webContents.send('bounding box',results);
+    }
 });
