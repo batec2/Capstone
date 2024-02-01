@@ -49,7 +49,6 @@ function getTensor(frame){
         data:Uint8Array.from(frame.data),
         width: frame.width, 
         height: frame.height};
-    console.log(imageObject.width,imageObject.height);
     const tensor = tfTools.getTensorFromImageData(imageObject,3);
     return tfTools.resizeTensor(tensor);
 }

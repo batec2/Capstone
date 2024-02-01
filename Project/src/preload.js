@@ -109,6 +109,9 @@ function drawBoundingBox(boundingArray){
 	});
 }
 
+ipcRenderer.on('give-frame',()=>{
+	getImageData();
+});
 
 // ipcRenderer.on('Return Image',(event,image)=>{
 // 	var idata = new ImageData(image,864,864);

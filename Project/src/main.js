@@ -68,7 +68,9 @@ app.on('window-all-closed',()=>{
  * the front end to be rendered
  */
 modelWorker.on('message',(results)=>{
+    console.log(results.length);
     if(results){
         win.webContents.send('bounding box',results);
     }
+    win.webContents.send('give-frame');
 });
