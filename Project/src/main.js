@@ -1,4 +1,5 @@
 import {app, BrowserWindow, ipcMain} from 'electron';
+import * as utils from './utils/utils.js';
 // import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
 import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
@@ -33,7 +34,7 @@ app.whenReady().then(() => {
      * @param image Uint8ClampedArray - data comes from Imagedata.data
      */
     ipcMain.on('getImage',(event,image)=>{
-            socket.emit('image',image.data);
+            socket.emit('image',image);
     });
     /**
      * On start up this looks for the 
@@ -60,5 +61,12 @@ app.on('window-all-closed',()=>{
         console.log("I'm Quitting Now, Goodbye!");
         app.quit();
     }
+});
+
+socket.on('bounding',results=>{
+    console.log(results);
+    const box = Array.from(results)
+    console.log(box);
+    win.webContents.send('bounding box',box);
 });
 
