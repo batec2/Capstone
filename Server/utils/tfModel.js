@@ -27,7 +27,6 @@ const model = await warmUpModel();
  * @param {} frame 
  */
 function getPrediction(frame){
-    console.log(tf.backend());
     const output = model.execute(frame);
     const boundingArrays = output.arraySync();
     const results = [];
@@ -56,9 +55,7 @@ function getTensor(frame){
 parentPort.on('message',(image) => {
     tf.engine().startScope();
     const tensor = getTensor(image);
-    if(tensor){
-        getPrediction(tensor);
-    }
+    getPrediction(tensor); 
     tf.engine().endScope();
     //console.log(tf.memory());
 })

@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld('api', {
 	getSource: ()=> {
 		ipcRenderer.send('start');
 	},
-	sendFrame: ()=> getImageData(),
+	sendFrame: ()=> ipcRenderer.send('send-frames'),
 })
 
 ipcRenderer.on('SET_SOURCE', async (event, sourceId) => set_source(sourceId));
@@ -98,7 +98,7 @@ function drawBoundingBox(boundingArray){
 	const ctx = canvas.getContext("2d");
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctx.strokeStyle = "#B033FF";
-	ctx.lineWidth = 2;
+	ctx.lineWidth = 1;
 	// Creates a rectangle for each prediction
 	boundingArray.forEach((prediction)=>{
 		ctx.strokeRect(

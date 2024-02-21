@@ -10,7 +10,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 let win;
 
-const socket = io('http://localhost:3001');
+const socket = io('http://localhost:3003');
+
+let sendFrames = false;
 
 const createWindow = () => {
     win = new BrowserWindow({
@@ -34,7 +36,7 @@ app.whenReady().then(() => {
      * @param image Uint8ClampedArray - data comes from Imagedata.data
      */
     ipcMain.on('getImage',(event,image)=>{
-            socket.emit('image',image);
+        socket.emit('image',image);
     });
     /**
      * On start up this looks for the 
@@ -43,12 +45,18 @@ app.whenReady().then(() => {
         utils.getSourceId().then((sourceId)=>{
             if(sourceId){
                 win.webContents.send('SET_SOURCE',sourceId);
+                setInterval(()=>{win.webContents.send('give-frame')},300);
             }
             else{
                 console.log('Could not get source');
             }
         });
     });
+
+    ipcMain.on('send-frames',()=>{
+        sendFrames = !sendFrames;
+    });
+
     createWindow();
 });
 
@@ -66,7 +74,7 @@ app.on('window-all-closed',()=>{
 socket.on('bounding',results=>{
     console.log(results);
     const box = Array.from(results)
-    console.log(box);
     win.webContents.send('bounding box',box);
 });
+
 
