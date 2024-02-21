@@ -1,15 +1,16 @@
-import {app, BrowserWindow, ipcMain, desktopCapturer} from 'electron';
-import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
-import {Worker,MessageChannel} from 'worker_threads';
+import {app, BrowserWindow, ipcMain} from 'electron';
 import * as utils from './utils/utils.js';
+// import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
 import * as path from 'node:path';//gets the path current path from node
 import {fileURLToPath} from 'url';
+import {io} from 'socket.io-client';
+
 //ES6 module does not have access to __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const modelWorker = new Worker('./src/utils/tfModel.js');
-const {port1,port2} = new MessageChannel();
 let win;
+
+const socket = io('http://localhost:3001');
 
 const createWindow = () => {
     win = new BrowserWindow({
@@ -33,7 +34,7 @@ app.whenReady().then(() => {
      * @param image Uint8ClampedArray - data comes from Imagedata.data
      */
     ipcMain.on('getImage',(event,image)=>{
-            modelWorker.postMessage(image);
+            socket.emit('image',image);
     });
     /**
      * On start up this looks for the 
@@ -58,19 +59,14 @@ are gone
 app.on('window-all-closed',()=>{
     if(process.platform !== 'darwin'){//Checks if the platform is not MacOS
         console.log("I'm Quitting Now, Goodbye!");
-        modelWorker.terminate();
         app.quit();
     }
 });
 
-/**
- * listens for a message from worker thread, and sends the resutls to
- * the front end to be rendered
- */
-modelWorker.on('message',(results)=>{
-    console.log(results.length);
-    if(results){
-        win.webContents.send('bounding box',results);
-    }
-    win.webContents.send('give-frame');
+socket.on('bounding',results=>{
+    console.log(results);
+    const box = Array.from(results)
+    console.log(box);
+    win.webContents.send('bounding box',box);
 });
+
