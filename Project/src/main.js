@@ -1,35 +1,72 @@
-import {app, BrowserWindow,screen, ipcMain} from 'electron';
-import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
-import {path} from 'node:path';
-import * as tf from '@tensorflow/tfjs-node';
+import {app, BrowserWindow, ipcMain} from 'electron';
+import * as utils from './utils/utils.js';
+// import {OverlayController, OVERLAY_WINDOW_OPTS} from 'electron-overlay-window';
+import * as path from 'node:path';//gets the path current path from node
+import {fileURLToPath} from 'url';
+import {io} from 'socket.io-client';
+
+//ES6 module does not have access to __dirname and __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+let win;
+
+const socket = io('http://localhost:3001');
 
 const createWindow = () => {
-	const win = new BrowserWindow({
-		width: 400,
-		height: 300,
-		webPreferences: {
-			preload: path.join(__dirname, 'preload.js'),
-			nodeIntegration: true,
-			contextIsolation: true
-		},
-		...OVERLAY_WINDOW_OPTS
-	});
-
-	win.loadFile('index.html');
-
-	// NOTE: if you close Dev Tools overlay window will lose transparency
-	win.webContents.openDevTools({ mode: 'detach', activate: false });
-
-	//https://github.com/SnosMe/electron-overlay-window/blob/master/src/demo/electron-demo.ts
-	//for demo of overlay
-	OverlayController.attachByTitle(
-		win,
-		'RuneLite',
-	)
+    win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            //_dirname is the path to the current script
+            //path.join creates a path by joining the root path with preload.js
+            preload: path.join(__dirname,'preload.js'),
+        }
+    });
+    win.loadFile('index.html');
+    //win.webContents.openDevTools({ mode: 'detach', activate: false });
 }
 
-
 app.whenReady().then(() => {
-	ipcMain.handle('mouseLocation',()=>screen.getCursorScreenPoint());
-  	createWindow();	
-})
+    /**
+     * Sends the image array to the worker thread to be passed into the model
+     * for inference. Sets the global isWorking thread to true to prevent
+     * more images to be sent to model before it completes inference. 
+     * @param image Uint8ClampedArray - data comes from Imagedata.data
+     */
+    ipcMain.on('getImage',(event,image)=>{
+            socket.emit('image',image);
+    });
+    /**
+     * On start up this looks for the 
+     */
+    ipcMain.on('start',()=>{
+        utils.getSourceId().then((sourceId)=>{
+            if(sourceId){
+                win.webContents.send('SET_SOURCE',sourceId);
+            }
+            else{
+                console.log('Could not get source');
+            }
+        });
+    });
+    createWindow();
+});
+
+/*
+listens for 'window-all-closed' event and quits application when all windows
+are gone 
+*/
+app.on('window-all-closed',()=>{
+    if(process.platform !== 'darwin'){//Checks if the platform is not MacOS
+        console.log("I'm Quitting Now, Goodbye!");
+        app.quit();
+    }
+});
+
+socket.on('bounding',results=>{
+    console.log(results);
+    const box = Array.from(results)
+    console.log(box);
+    win.webContents.send('bounding box',box);
+});
+

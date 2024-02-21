@@ -1,5 +1,9 @@
 /Project/node_modules
+/Server/node_modules
 cmpt-496-course-agreement.pdf
 opencv*
 data/
-agility_web_model-v1/
+model/
+Project/redone.png
+Project/src/utils/2024-01-05_14-39-15.png
+Project/src/utils/tfTesting.js
