@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Runescape Bot",
   "type": "module",
-  "main": "./src/main.js",
+  "main": "./src/index.js",
   "scripts": {
     "start": "electron .",
     "logging": "electron . --enable-logging"
