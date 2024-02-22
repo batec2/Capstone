@@ -75,22 +75,34 @@ export const resizeTensor = (image) => {
   return img; //[1,3,864,864] rank of 4 (4d array) to match model requirements
 };
 
-const nonMaxSuppression = (results) => {};
-
 export const splitResult = (results) => {
-  //gets top left xy, and bottom right xy
-  const bounding = results.map((result) => [
-    result[0] - result[2] / 2,
-    result[1] - result[3] / 2,
-    result[2],
-    result[3],
-  ]);
-  const scores = results.map((result) => result[4]);
-  const dectectionClass = results.map((result) => result[5]);
-
-  return {
-    bounding: bounding,
-    scores: scores,
-    detectionClass: dectectionClass,
+  const detectedArrays = {
+    bounding: [],
+    widthHeight: [],
+    scores: [],
+    detectionClass: [],
   };
+  results.forEach((result) => {
+    detectedArrays.bounding.push(
+      [
+        result[1] - result[3] / 2, //y1
+        result[0] - result[2] / 2, //x1
+        result[1] + result[3] / 2, //y2
+        result[0] + result[2] / 2,
+      ] //x2
+    );
+    detectedArrays.widthHeight.push([result[3], result[2]]); //height,width
+    detectedArrays.scores.push(result[4]); //scores
+    detectedArrays.detectionClass.push(result[5]); //objectclass
+  });
+  return detectedArrays;
+};
+
+export const nonMaxSuppression = async (results) => {
+  const { bounding, scores } = splitResult(results);
+  if (bounding.length > 0) {
+    const box = tf.image.nonMaxSuppression(bounding, scores, 1);
+    console.log(box.arraySync());
+  }
+  // return tf.nonMaxSuppression(bounding, scores, 1, 0.5, 0.9);
 };

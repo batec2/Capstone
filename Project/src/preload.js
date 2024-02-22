@@ -42,7 +42,7 @@ async function set_source(sourceId) {
 }
 
 ipcRenderer.on("bounding box", (event, boundingArray) => {
-  drawBoundingBox(boundingArray.bounding);
+  drawBoundingBox(boundingArray.bounding, boundingArray.widthHeight);
 });
 
 function handleStream(stream) {
@@ -98,22 +98,21 @@ function getImageData() {
  * canvas overlayed on the video stream.
  * @param {{centerX,centerY,Width,height}[]} boundingArray
  */
-function drawBoundingBox(boundingArray) {
+function drawBoundingBox(boundingArray, widthHeight) {
   const canvas = document.getElementById("overlay-canvas");
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#B033FF";
   ctx.lineWidth = 1;
   // Creates a rectangle for each prediction
-  console.log(boundingArray);
-  boundingArray.forEach((prediction) => {
+  for (let i = 0; i < boundingArray.length; i++) {
     ctx.strokeRect(
-      prediction[0], //x minus half of height to get top left
-      prediction[1], //y
-      prediction[2], //width
-      prediction[3] //height
+      boundingArray[i][1], //x
+      boundingArray[i][0], //y
+      widthHeight[i][1], //width
+      widthHeight[i][0] //height
     );
-  });
+  }
 }
 
 ipcRenderer.on("give-frame", () => {

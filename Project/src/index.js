@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 let win;
 
-const socket = io("http://localhost:3005");
+const socket = io("http://localhost:3008");
 
 let sendFrames = false;
 

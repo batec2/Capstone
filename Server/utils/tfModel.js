@@ -51,6 +51,12 @@ const getTensor = (frame) => {
   return tfTools.resizeTensor(tensor);
 };
 
+/**
+ *
+ * @param {*} image
+ * @param {*} model
+ * @returns [y,x,w,h,score,class]
+ */
 export const predict = (image, model) => {
   tf.engine().startScope();
   const tensor = getTensor(image);
