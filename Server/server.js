@@ -34,7 +34,7 @@ io.on("connection", async (socket) => {
         filteredBoxes.scores.push(scores[index]);
         filteredBoxes.detectionClass.push(detectionClass[index]);
       }
-      socket.emit("bounding", filteredBoxes);
+      socket.emit("BOUNDING_BOX", filteredBoxes);
     }
   });
 });

@@ -4,7 +4,6 @@
  */
 const { contextBridge, ipcRenderer } = require("electron");
 
-let globalStream;
 let videoTrack;
 let imageCapture;
 
@@ -41,11 +40,6 @@ async function set_source(sourceId) {
   }
 }
 
-ipcRenderer.on("bounding box", (event, boundingArray) => {
-  // console.log(boundingArray);
-  drawBoundingBox(boundingArray.bounding, boundingArray.widthHeight);
-});
-
 function handleStream(stream) {
   const video = document.getElementById("video-player");
   video.srcObject = stream;
@@ -59,6 +53,10 @@ function handleStream(stream) {
     dataCanvas.width = video.clientWidth;
   };
 }
+
+ipcRenderer.on("give-frame", () => {
+  getImageData();
+});
 
 /**
  * Takes a frame from a video track and sends it to the main thread
@@ -94,6 +92,11 @@ function getImageData() {
     });
 }
 
+ipcRenderer.on("bounding box", (event, boundingArray) => {
+  // console.log(boundingArray);
+  drawBoundingBox(boundingArray.bounding, boundingArray.widthHeight);
+});
+
 /**
  * Takes the array of bounding boxes given by the model and draws it to a
  * canvas overlayed on the video stream.
@@ -115,14 +118,3 @@ function drawBoundingBox(boundingArray, widthHeight) {
     );
   }
 }
-
-ipcRenderer.on("give-frame", () => {
-  getImageData();
-});
-
-// ipcRenderer.on('Return Image',(event,image)=>{
-// 	var idata = new ImageData(image,864,864);
-// 	const canvas = document.getElementById('testCanvas2');
-// 	const ctx = canvas.getContext("2d",{ willReadFrequently: true });
-// 	ctx.putImageData(idata,0,0,);
-// });
