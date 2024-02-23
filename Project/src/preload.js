@@ -42,6 +42,7 @@ async function set_source(sourceId) {
 }
 
 ipcRenderer.on("bounding box", (event, boundingArray) => {
+  // console.log(boundingArray);
   drawBoundingBox(boundingArray.bounding, boundingArray.widthHeight);
 });
 

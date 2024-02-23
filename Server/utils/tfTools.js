@@ -98,11 +98,19 @@ export const splitResult = (results) => {
   return detectedArrays;
 };
 
-export const nonMaxSuppression = async (results) => {
+export const nonMaxSuppression = (results) => {
   const { bounding, scores } = splitResult(results);
   if (bounding.length > 0) {
-    const box = tf.image.nonMaxSuppression(bounding, scores, 1);
-    console.log(box.arraySync());
+    const box = tf.image.nonMaxSuppressionWithScore(
+      bounding,
+      scores,
+      5,
+      0.5,
+      0.8,
+      1 //0 normal NMS/1 softNMS
+    );
+    const selected = box.selectedIndices.dataSync();
+    return selected;
   }
   // return tf.nonMaxSuppression(bounding, scores, 1, 0.5, 0.9);
 };

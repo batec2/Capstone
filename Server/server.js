@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 import { predict, warmUpModel } from "./utils/tfModel.js";
 import { nonMaxSuppression, splitResult } from "./utils/tfTools.js";
 
-const io = new Server(3008, {
+const io = new Server(3009, {
   maxHttpBufferSize: 1e8,
 });
 
@@ -18,12 +18,23 @@ io.on("connection", async (socket) => {
       height: image.height,
     };
     const results = predict(frame, model);
-    // console.log(results);
-    // console.log(frame);
     if (results) {
-      const slicedResults = splitResult(results);
-      nonMaxSuppression(results);
-      socket.emit("bounding", slicedResults);
+      const { bounding, widthHeight, scores, detectionClass } =
+        splitResult(results);
+      const nms = nonMaxSuppression(results);
+      const filteredBoxes = {
+        bounding: [],
+        widthHeight: [],
+        scores: [],
+        detectionClass: [],
+      };
+      for (const index in nms) {
+        filteredBoxes.bounding.push(bounding[index]);
+        filteredBoxes.widthHeight.push(widthHeight[index]);
+        filteredBoxes.scores.push(scores[index]);
+        filteredBoxes.detectionClass.push(detectionClass[index]);
+      }
+      socket.emit("bounding", filteredBoxes);
     }
   });
 });
