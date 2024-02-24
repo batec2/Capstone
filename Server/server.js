@@ -2,8 +2,15 @@ import { Worker, MessageChannel } from "worker_threads";
 import { Server } from "socket.io";
 import { predict, warmUpModel } from "./utils/tfModel.js";
 import { nonMaxSuppression, splitResult } from "./utils/tfTools.js";
+import express from "express";
+import cors from "cors";
+
+// const app = express();
 
 const io = new Server(3009, {
+  cors: {
+    origin: "*",
+  },
   maxHttpBufferSize: 1e8,
 });
 
@@ -12,6 +19,7 @@ const model = await warmUpModel();
 io.on("connection", async (socket) => {
   console.log(socket.id);
   socket.on("image", (image) => {
+    // console.log(image);
     const frame = {
       data: Array.from(image.data),
       width: image.width,
@@ -34,7 +42,7 @@ io.on("connection", async (socket) => {
         filteredBoxes.scores.push(scores[index]);
         filteredBoxes.detectionClass.push(detectionClass[index]);
       }
-      socket.emit("bounding", filteredBoxes);
+      socket.emit("BOUNDING_BOX", filteredBoxes);
     }
   });
 });
