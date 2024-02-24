@@ -1,14 +1,18 @@
 import "./App.css";
-import drawBoundingBox from "../canvas/drawBoundingBox";
-import setVideo from "../video/setVideo.react.js";
+import drawBoundingBox from "./canvas/drawBoundingBox.js";
+import setVideo from "./video/setVideo.react.js";
 import { useEffect, useRef } from "react";
 function App() {
-  window.api.drawBoundingBox(drawBoundingBox);
-  const videoRef = useRef(null);
+  // window.api.drawBoundingBox(drawBoundingBox);
+  const videoRef = useRef();
 
   const handleStream = async () => {
-    const id = await window.api.getSourceId();
-    setVideo(id, videoRef);
+    try {
+      const id = await window.api.getSourceId();
+      setVideo(id, videoRef.current);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
