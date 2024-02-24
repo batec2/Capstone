@@ -1,37 +1,52 @@
-import {Worker,MessageChannel} from 'worker_threads';
+import { Worker, MessageChannel } from "worker_threads";
+import { Server } from "socket.io";
+import { predict, warmUpModel } from "./utils/tfModel.js";
+import { nonMaxSuppression, splitResult } from "./utils/tfTools.js";
+import express from "express";
+import cors from "cors";
 
-const modelWorker = new Worker('./utils/tfModel.js');
+// const app = express();
 
-/**
- * listens for a message from worker thread, and sends the resutls to
- * the front end to be rendered
- */
-modelWorker.on('message',(results)=>{
-    console.log(results.length);
-    if(results){
-        win.webContents.send('bounding box',results);
-    }
-    win.webContents.send('give-frame');
+const io = new Server(3009, {
+  cors: {
+    origin: "*",
+  },
+  maxHttpBufferSize: 1e8,
 });
 
-// import { Server } from "socket.io";
+const model = await warmUpModel();
 
-// const io = new Server(3001, {
-//     maxHttpBufferSize: 1e8
-// });
+io.on("connection", async (socket) => {
+  console.log(socket.id);
+  socket.on("image", (image) => {
+    // console.log(image);
+    const frame = {
+      data: Array.from(image.data),
+      width: image.width,
+      height: image.height,
+    };
+    const results = predict(frame, model);
+    if (results) {
+      const { bounding, widthHeight, scores, detectionClass } =
+        splitResult(results);
+      const nms = nonMaxSuppression(results);
+      const filteredBoxes = {
+        bounding: [],
+        widthHeight: [],
+        scores: [],
+        detectionClass: [],
+      };
+      for (const index in nms) {
+        filteredBoxes.bounding.push(bounding[index]);
+        filteredBoxes.widthHeight.push(widthHeight[index]);
+        filteredBoxes.scores.push(scores[index]);
+        filteredBoxes.detectionClass.push(detectionClass[index]);
+      }
+      socket.emit("BOUNDING_BOX", filteredBoxes);
+    }
+  });
+});
 
-// console.log('go');
-
-// io.on('connection', socket => {
-//     console.log(socket.id);
-//     socket.on('image',image=>{
-//         console.log(image);
-//         modelWorker.postMessage(image);
-//     });
-// });
-
-// io.on('disconnect',()=>{
-//     console.log('disconnected');
-// });
-
-// export LD_LIBRARY_PATH=/home/crush/.local/lib/python3.10/site-packages/nvidia/cudnn/lib/libcudnn.so.8:$LD_LIBRARY_PATH
+io.on("disconnect", () => {
+  console.log("disconnected");
+});
