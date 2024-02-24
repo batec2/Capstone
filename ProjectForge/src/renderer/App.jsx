@@ -1,19 +1,24 @@
 import "./App.css";
 import drawBoundingBox from "./canvas/drawBoundingBox.js";
 import setVideo from "./video/setVideo.react.js";
-import { useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { io } from "socket.io-client";
 import getFrameData from "./canvas/getFrameData.js";
 
 function App() {
+  const [currentWidth, setWidth] = useState(0);
+  const [currentHeight, setHeight] = useState(0);
   // window.api.drawBoundingBox(drawBoundingBox);
   const videoRef = useRef();
   const canvasRef = useRef();
   const dataRef = useRef();
   const socket = io("http://localhost:3009");
+  // let sendData = false;
+  let interval;
   let stream;
   let imageCapture;
   let dataContext;
+  let canvasContext;
 
   const handleStream = async () => {
     try {
@@ -31,12 +36,15 @@ function App() {
       video.srcObject = stream;
       video.onloadedmetadata = (e) => {
         video.play();
+        setHeight(video.clientHeight);
+        setWidth(video.clientWidth);
       };
       const videoTrack = stream.getVideoTracks()[0];
       imageCapture = new ImageCapture(videoTrack);
       dataContext = dataRef.current.getContext("2d", {
         willReadFrequently: true,
       });
+      canvasContext = canvasRef.current.getContext("2d");
     } catch (err) {
       console.log(err);
     }
@@ -44,14 +52,23 @@ function App() {
 
   const handleFrame = async () => {
     if (imageCapture) {
-      const frame = await getFrameData(imageCapture, dataContext);
-      console.log(frame);
-      socket.emit("image", frame);
+      if (!interval) {
+        interval = setInterval(async () => {
+          const frame = await getFrameData(imageCapture, dataContext);
+          socket.emit("image", frame);
+        }, 300);
+      } else {
+        clearInterval(interval);
+        interval = null;
+      }
     }
   };
 
-  socket.on("BOUNDING_BOX", (boundingArray) => {
-    console.log(boundingArray);
+  socket.on("BOUNDING_BOX", (filteredBoxes) => {
+    if (canvasContext) {
+      const { bounding, widthHeight } = filteredBoxes;
+      drawBoundingBox(bounding, widthHeight, canvasContext, canvasRef.current);
+    }
   });
 
   return (
@@ -63,10 +80,20 @@ function App() {
         <button onClick={() => handleFrame()}>Predict</button>
       </div>
       <div className="video-box">
-        <video className="video-player Predictions" ref={videoRef}></video>
-        <canvas className="overlay-canvas Predictions" ref={canvasRef}></canvas>
+        <canvas
+          className="overlay-canvas"
+          ref={canvasRef}
+          height={currentHeight}
+          width={currentWidth}
+        ></canvas>
+        <video className="video-player" ref={videoRef}></video>
       </div>
-      <canvas className="data-canvas" ref={dataRef}></canvas>
+      <canvas
+        className="data-canvas"
+        ref={dataRef}
+        height={currentHeight}
+        width={currentWidth}
+      ></canvas>
     </div>
   );
 }

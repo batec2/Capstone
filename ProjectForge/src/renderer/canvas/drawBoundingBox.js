@@ -5,7 +5,7 @@
  * @param {*} widthHeight
  * @param {*} canvasContext
  */
-const drawBoundingBox = (boundingArray, widthHeight, canvasContext) => {
+const drawBoundingBox = (boundingArray, widthHeight, canvasContext, canvas) => {
   canvasContext.clearRect(0, 0, canvas.width, canvas.height);
   canvasContext.strokeStyle = "#B033FF";
   canvasContext.lineWidth = 1;
