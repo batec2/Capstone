@@ -27,3 +27,5 @@ const getFrameData = async (imageCapture, canvasContext) => {
     console.log(err);
   }
 };
+
+export default getFrameData;

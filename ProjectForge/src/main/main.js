@@ -9,7 +9,7 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-const socket = io("http://localhost:3009");
+// const socket = io("http://localhost:3009");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,10 +52,10 @@ app.on("window-all-closed", () => {
   }
 });
 
-socket.on("BOUNDING_BOX", (boundingArray) => {
-  // console.log(results);
-  win.webContents.send("BOUNDING_BOX", boundingArray);
-});
+// socket.on("BOUNDING_BOX", (boundingArray) => {
+//   // console.log(results);
+//   win.webContents.send("BOUNDING_BOX", boundingArray);
+// });
 
 ipcMain.handle("GET_SOURCE", async () => {
   const id = await getSourceId();
@@ -65,6 +65,6 @@ ipcMain.handle("GET_SOURCE", async () => {
 /**
  * @param image Uint8ClampedArray - data comes from Imagedata.data
  */
-ipcMain.on("PREDICT_FRAME", (event, image) => {
-  socket.emit("image", image);
-});
+// ipcMain.on("PREDICT_FRAME", (event, image) => {
+//   socket.emit("image", image);
+// });
