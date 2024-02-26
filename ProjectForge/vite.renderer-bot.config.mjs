@@ -13,11 +13,11 @@ export default defineConfig((env) => {
   /** @type {import('vite').UserConfig} */
   return {
     // Root is where the index.html is
-    root: "./src/renderer/",
+    root: "./src/renderer-bot/",
     mode,
     base: "./",
     build: {
-      outDir: `.vite/renderer/${name}`,
+      outDir: `.vite/renderer-bot/${name}`,
     },
     plugins: [pluginExposeRenderer(name), react()],
     resolve: {
