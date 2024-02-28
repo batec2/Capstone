@@ -12,7 +12,7 @@ function App() {
   const videoRef = useRef();
   const canvasRef = useRef();
   const dataRef = useRef();
-  const socket = io("http://localhost:3009");
+  const socket = io("http://localhost:3000");
   // let sendData = false;
   let interval;
   let stream;
@@ -56,7 +56,7 @@ function App() {
         interval = setInterval(async () => {
           const frame = await getFrameData(imageCapture, dataContext);
           socket.emit("image", frame);
-        }, 300);
+        }, 2000);
       } else {
         clearInterval(interval);
         interval = null;

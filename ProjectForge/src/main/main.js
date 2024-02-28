@@ -2,6 +2,15 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "node:path"; //gets the path current path from node
 import { fileURLToPath } from "url";
 import getSourceId from "../renderer/video/getSourceId";
+import { io } from "socket.io-client";
+import {
+  mouse,
+  straightTo,
+  Point,
+  getActiveWindow,
+  windowWithTitle,
+  screen,
+} from "@nut-tree/nut-js";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -10,6 +19,8 @@ if (require("electron-squirrel-startup")) {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const socket = io("http://localhost:3000");
 
 const createWindow = () => {
   // Create the browser window.
@@ -27,7 +38,7 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/index.html`));
   }
   // Open the DevTools.
-  mainWindow.webContents.openDevTools({ mode: "detach" });
+  mainWindow.webContents.openDevTools();
 };
 
 const createBotWindow = () => {
@@ -49,12 +60,43 @@ const createBotWindow = () => {
   botWindow.webContents.openDevTools({ mode: "detach" });
 };
 
+const test = async () => {
+  try {
+    // console.log(await screen.find(windowWithTitle("RuneLite-YametteOnii")));
+    console.log("here");
+    console.log(windowWithTitle("RuneLite-YametteOnii"));
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
-  createBotWindow();
+  // createBotWindow();
+  test();
+  socket.on("BOUNDING_BOX", async (filteredBoxes) => {
+    try {
+      if (!filteredBoxes && filteredBoxes.bounding.length === 0) {
+        return;
+      }
+      const windowRef = await getActiveWindow();
+      const region = await windowRef.region;
+
+      const { bounding, widthHeight } = filteredBoxes;
+      console.log(bounding[0][0], bounding[0][1]);
+      const point = new Point(
+        region.left + bounding[0][1] + widthHeight[0][0] / 2,
+        region.top + bounding[0][0] + widthHeight[0][1] / 2
+      );
+      // const point = new Point(region.left, region.top);
+      await mouse.move(straightTo(point));
+    } catch (e) {
+      console.log(e);
+    }
+  });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

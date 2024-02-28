@@ -12,6 +12,7 @@ export default defineConfig((env) => {
 
   /** @type {import('vite').UserConfig} */
   return {
+    // optimizeDeps: { noDiscovery: true },
     // Root is where the index.html is
     root: "./src/renderer-bot/",
     mode,
