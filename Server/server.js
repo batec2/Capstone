@@ -45,7 +45,8 @@ io.on("connection", async (socket) => {
         filteredBoxes.scores.push(scores[index]);
         filteredBoxes.detectionClass.push(detectionClass[index]);
       }
-      // socket.emit("BOUNDING_BOX", filteredBoxes);
+      // only send if there are detected items
+      console.log(filteredBoxes);
       io.emit("BOUNDING_BOX", filteredBoxes);
     }
   });

@@ -10,6 +10,9 @@ import {
   getActiveWindow,
   windowWithTitle,
   screen,
+  keyboard,
+  Key,
+  Button,
 } from "@nut-tree/nut-js";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -79,7 +82,11 @@ app.whenReady().then(() => {
   test();
   socket.on("BOUNDING_BOX", async (filteredBoxes) => {
     try {
-      if (!filteredBoxes && filteredBoxes.bounding.length === 0) {
+      if (filteredBoxes.bounding.length === 0) {
+        await keyboard.pressKey(Key.Left);
+        setTimeout(500, async () => {
+          keyboard.releaseKey(Key.Left);
+        });
         return;
       }
       const windowRef = await getActiveWindow();
@@ -92,7 +99,9 @@ app.whenReady().then(() => {
         region.top + bounding[0][0] + widthHeight[0][1] / 2
       );
       // const point = new Point(region.left, region.top);
-      await mouse.move(straightTo(point));
+      mouse.move(straightTo(point)).then(async () => {
+        await mouse.leftClick();
+      });
     } catch (e) {
       console.log(e);
     }
