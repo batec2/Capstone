@@ -63,22 +63,9 @@ const onBoundingBox = (filteredBoxes) => {
   currentDetection = filteredBoxes;
 };
 
-let previousPosition = { x: null, y: null };
+let clientData = { x: null, y: null };
 const onGameTick = async (data) => {
-  const dataJSON = JSON.parse(data);
-  const { camera, player, animation } = dataJSON;
-  // Activates bot only if the player hasnt moved for 1 tick and not in a
-  // animation
-  // console.log(player, animation);
-  if (
-    player.x === previousPosition.x &&
-    player.y === previousPosition.y &&
-    animation === -1
-  ) {
-    // console.log("moving");
-    await moveBot(currentDetection);
-  }
-  previousPosition = player;
+  clientData = JSON.parse(data);
 };
 
 // This method will be called when Electron has finished
@@ -90,6 +77,24 @@ app.whenReady().then(() => {
 
   modelSocket.on("BOUNDING_BOX", onBoundingBox);
   clientSocket.on("data", onGameTick);
+
+  let position = null;
+  setInterval(async () => {
+    try {
+      // console.log(clientData);
+      if (
+        !position ||
+        (position.x === clientData.player.x &&
+          position.y === clientData.player.y &&
+          clientData.animation === -1)
+      ) {
+        await moveBot(currentDetection);
+      }
+      position = clientData.player;
+    } catch (e) {
+      console.log(e);
+    }
+  }, 5000);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
