@@ -13,7 +13,6 @@ contextBridge.exposeInMainWorld("api", {
       callback();
     });
   },
-  getImage: (image) => ipcRenderer.send("PREDICT_FRAME", image),
   getSourceId: async () => {
     try {
       const id = await ipcRenderer.invoke("GET_SOURCE");
@@ -22,14 +21,4 @@ contextBridge.exposeInMainWorld("api", {
       console.log(err);
     }
   },
-
-  drawBoundingBox: (callback) => {
-    ipcRenderer.on("BOUNDING_BOX", (_, boundingArray) => {
-      callback(boundingArray.bounding, boundingArray.widthHeight);
-    });
-  },
-});
-
-ipcRenderer.on("give-frame", () => {
-  getImageData();
 });

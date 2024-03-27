@@ -46,6 +46,10 @@ module.exports = {
             name: "main_window",
             config: "vite.renderer.config.mjs",
           },
+          {
+            name: "bot_window",
+            config: "vite.renderer-bot.config.mjs",
+          },
         ],
       },
     },

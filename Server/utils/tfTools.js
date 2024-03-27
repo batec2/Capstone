@@ -91,7 +91,7 @@ export const splitResult = (results) => {
         result[0] + result[2] / 2,
       ] //x2
     );
-    detectedArrays.widthHeight.push([result[3], result[2]]); //height,width
+    detectedArrays.widthHeight.push([result[3], result[2]]); //width,height
     detectedArrays.scores.push(result[4]); //scores
     detectedArrays.detectionClass.push(result[5]); //objectclass
   });

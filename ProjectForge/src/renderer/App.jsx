@@ -12,7 +12,7 @@ function App() {
   const videoRef = useRef();
   const canvasRef = useRef();
   const dataRef = useRef();
-  const socket = io("http://localhost:3009");
+  const socket = io("http://localhost:3000");
   // let sendData = false;
   let interval;
   let stream;
@@ -20,6 +20,9 @@ function App() {
   let dataContext;
   let canvasContext;
 
+  /**
+   *
+   */
   const handleStream = async () => {
     try {
       const video = videoRef.current;
@@ -50,13 +53,16 @@ function App() {
     }
   };
 
+  /**
+   * Takes a frame from the data canvas and sends it to the ml server
+   */
   const handleFrame = async () => {
     if (imageCapture) {
       if (!interval) {
         interval = setInterval(async () => {
           const frame = await getFrameData(imageCapture, dataContext);
           socket.emit("image", frame);
-        }, 300);
+        }, 2000);
       } else {
         clearInterval(interval);
         interval = null;
@@ -64,6 +70,9 @@ function App() {
     }
   };
 
+  /**
+   * Draws bounding box on screen when a detection is found
+   */
   socket.on("BOUNDING_BOX", (filteredBoxes) => {
     if (canvasContext) {
       const { bounding, widthHeight } = filteredBoxes;

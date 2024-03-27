@@ -7,7 +7,7 @@ import cors from "cors";
 
 // const app = express();
 
-const io = new Server(3009, {
+const io = new Server(3000, {
   cors: {
     origin: "*",
   },
@@ -19,7 +19,10 @@ const model = await warmUpModel();
 io.on("connection", async (socket) => {
   console.log(socket.id);
   socket.on("image", (image) => {
-    // console.log(image);
+    console.log("predicting");
+    if (!image) {
+      return;
+    }
     const frame = {
       data: Array.from(image.data),
       width: image.width,
@@ -42,7 +45,9 @@ io.on("connection", async (socket) => {
         filteredBoxes.scores.push(scores[index]);
         filteredBoxes.detectionClass.push(detectionClass[index]);
       }
-      socket.emit("BOUNDING_BOX", filteredBoxes);
+      // only send if there are detected items
+      console.log(filteredBoxes);
+      io.emit("BOUNDING_BOX", filteredBoxes);
     }
   });
 });
