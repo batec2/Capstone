@@ -23,7 +23,11 @@ if (require("electron-squirrel-startup")) {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const socket = io("http://localhost:3000");
+const modelSocket = io("http://localhost:3000");
+
+const clientSocket = io.connect("http://localhost:3030", {
+  transports: ["websocket"],
+});
 
 const createWindow = () => {
   // Create the browser window.
@@ -66,8 +70,8 @@ const createBotWindow = () => {
 const test = async () => {
   try {
     // console.log(await screen.find(windowWithTitle("RuneLite-YametteOnii")));
-    console.log("here");
-    console.log(windowWithTitle("RuneLite-YametteOnii"));
+    // console.log("here");
+    // console.log(windowWithTitle("RuneLite-YametteOnii"));
   } catch (e) {
     console.log(e);
   }
@@ -79,8 +83,8 @@ const test = async () => {
 app.whenReady().then(() => {
   createWindow();
   // createBotWindow();
-  test();
-  socket.on("BOUNDING_BOX", async (filteredBoxes) => {
+  // test();
+  modelSocket.on("BOUNDING_BOX", async (filteredBoxes) => {
     try {
       if (filteredBoxes.bounding.length === 0) {
         await keyboard.pressKey(Key.Left);
@@ -106,7 +110,13 @@ app.whenReady().then(() => {
       console.log(e);
     }
   });
+
+  clientSocket.on("camera-data", (data) => {
+    console.log(JSON.parse(data));
+  });
 });
+// console.log("test");
+// clientSocket.emit("test");
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

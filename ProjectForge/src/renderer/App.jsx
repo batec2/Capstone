@@ -20,6 +20,9 @@ function App() {
   let dataContext;
   let canvasContext;
 
+  /**
+   *
+   */
   const handleStream = async () => {
     try {
       const video = videoRef.current;
@@ -50,6 +53,9 @@ function App() {
     }
   };
 
+  /**
+   * Takes a frame from the data canvas and sends it to the ml server
+   */
   const handleFrame = async () => {
     if (imageCapture) {
       if (!interval) {
@@ -64,6 +70,9 @@ function App() {
     }
   };
 
+  /**
+   * Draws bounding box on screen when a detection is found
+   */
   socket.on("BOUNDING_BOX", (filteredBoxes) => {
     if (canvasContext) {
       const { bounding, widthHeight } = filteredBoxes;
