@@ -3,17 +3,7 @@ import * as path from "node:path"; //gets the path current path from node
 import { fileURLToPath } from "url";
 import getSourceId from "../renderer/video/getSourceId";
 import { io } from "socket.io-client";
-import {
-  mouse,
-  straightTo,
-  Point,
-  getActiveWindow,
-  windowWithTitle,
-  screen,
-  keyboard,
-  Key,
-  Button,
-} from "@nut-tree/nut-js";
+import { moveBot } from "./bot";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -23,8 +13,9 @@ if (require("electron-squirrel-startup")) {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Connection to computer vision server
 const modelSocket = io("http://localhost:3000");
-
+// Connection to runelite server
 const clientSocket = io.connect("http://localhost:3030", {
   transports: ["websocket"],
 });
@@ -67,14 +58,27 @@ const createBotWindow = () => {
   botWindow.webContents.openDevTools({ mode: "detach" });
 };
 
-const test = async () => {
-  try {
-    // console.log(await screen.find(windowWithTitle("RuneLite-YametteOnii")));
-    // console.log("here");
-    // console.log(windowWithTitle("RuneLite-YametteOnii"));
-  } catch (e) {
-    console.log(e);
+let currentDetection = null;
+const onBoundingBox = (filteredBoxes) => {
+  currentDetection = filteredBoxes;
+};
+
+let previousPosition = { x: null, y: null };
+const onGameTick = async (data) => {
+  const dataJSON = JSON.parse(data);
+  const { camera, player, animation } = dataJSON;
+  // Activates bot only if the player hasnt moved for 1 tick and not in a
+  // animation
+  // console.log(player, animation);
+  if (
+    player.x === previousPosition.x &&
+    player.y === previousPosition.y &&
+    animation === -1
+  ) {
+    // console.log("moving");
+    await moveBot(currentDetection);
   }
+  previousPosition = player;
 };
 
 // This method will be called when Electron has finished
@@ -83,40 +87,10 @@ const test = async () => {
 app.whenReady().then(() => {
   createWindow();
   // createBotWindow();
-  // test();
-  modelSocket.on("BOUNDING_BOX", async (filteredBoxes) => {
-    try {
-      if (filteredBoxes.bounding.length === 0) {
-        await keyboard.pressKey(Key.Left);
-        setTimeout(500, async () => {
-          keyboard.releaseKey(Key.Left);
-        });
-        return;
-      }
-      const windowRef = await getActiveWindow();
-      const region = await windowRef.region;
 
-      const { bounding, widthHeight } = filteredBoxes;
-      console.log(bounding[0][0], bounding[0][1]);
-      const point = new Point(
-        region.left + bounding[0][1] + widthHeight[0][0] / 2,
-        region.top + bounding[0][0] + widthHeight[0][1] / 2
-      );
-      // const point = new Point(region.left, region.top);
-      mouse.move(straightTo(point)).then(async () => {
-        await mouse.leftClick();
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  clientSocket.on("camera-data", (data) => {
-    console.log(JSON.parse(data));
-  });
+  modelSocket.on("BOUNDING_BOX", onBoundingBox);
+  clientSocket.on("data", onGameTick);
 });
-// console.log("test");
-// clientSocket.emit("test");
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
