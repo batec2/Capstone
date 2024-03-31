@@ -25,10 +25,10 @@ export const moveBot = async (filteredBoxes) => {
 
     // Turns camera if there are no detections
     if (filteredBoxes.bounding.length === 0) {
-      // await keyboard.pressKey(Key.Left);
-      // setTimeout(30, async () => {
-      //   keyboard.releaseKey(Key.Left);
-      // });
+      await keyboard.pressKey(Key.Left);
+      setTimeout(30, async () => {
+        keyboard.releaseKey(Key.Left);
+      });
       return;
     }
 
@@ -52,7 +52,7 @@ export const moveBot = async (filteredBoxes) => {
     console.log(point);
     mouse.config.mouseSpeed = 500;
     // Moves mouse towards detected box
-    mouse.move(straightTo(point));
+    // mouse.move(straightTo(point));
     // .then(async () => {
     //   await mouse.leftClick();
     // });

@@ -4,6 +4,7 @@ import setVideo from "./video/setVideo.react.js";
 import { useState, useRef } from "react";
 import { io } from "socket.io-client";
 import getFrameData from "./canvas/getFrameData.js";
+import { Button } from "@/components/ui/button";
 
 function App() {
   const [currentWidth, setWidth] = useState(0);
@@ -83,10 +84,10 @@ function App() {
   return (
     <div>
       <div className="button-box">
-        <button className="get-source" onClick={() => handleStream()}>
+        <Button className="m-2" onClick={() => handleStream()}>
           Get Source
-        </button>
-        <button onClick={() => handleFrame()}>Predict</button>
+        </Button>
+        <Button onClick={() => handleFrame()}>Predict</Button>
       </div>
       <div className="video-box">
         <canvas
