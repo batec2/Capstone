@@ -13,6 +13,54 @@ import {
 const PIXEL_HIGH = { R: 56, G: 127, B: 32, A: 255 };
 const PIXEL_LOW = { R: 25, G: 101, B: 14, A: 255 };
 
+const getRandomInt = (max) => {
+  return Math.floor(Math.random() * max);
+};
+
+/**
+ * Checks if the colour values of the point are within range
+ * @param {*} point
+ * @returns
+ */
+const checkPoint = async (point) => {
+  const pixel = await screen.colorAt(point);
+  if (
+    pixel.R < PIXEL_HIGH.R &&
+    pixel.R > PIXEL_LOW.R &&
+    pixel.G < PIXEL_HIGH.G &&
+    pixel.G > PIXEL_LOW.G &&
+    pixel.B < PIXEL_HIGH.B &&
+    pixel.B > PIXEL_LOW.B
+  ) {
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Generates a random point within the bounding box that has a valid colour
+ * @param {*} left - left of window on screen
+ * @param {*} top - top of window on screen
+ * @param {*} x - left of bounding box
+ * @param {*} y - top of bounding box
+ * @param {*} width - width of bounding box
+ * @param {*} height - height of bounding box
+ * @returns
+ */
+const generatePoint = async (top, left, x, y, width, height) => {
+  let point = new Point(
+    left + x + getRandomInt(width),
+    top + y + getRandomInt(height)
+  );
+  while (await checkPoint(point)) {
+    point = new Point(
+      left + x + getRandomInt(width),
+      top + y + getRandomInt(height)
+    );
+  }
+  return point;
+};
+
 export const moveBot = async (filteredBoxes) => {
   try {
     const windowRef = await getActiveWindow();
@@ -20,6 +68,7 @@ export const moveBot = async (filteredBoxes) => {
     const title = await windowRef.title;
 
     if (!title.includes("RuneLite") || !filteredBoxes) {
+      // moveCameraWithScroll(region.width, region.height);
       return;
     }
 
@@ -45,8 +94,10 @@ export const moveBot = async (filteredBoxes) => {
       widthHeight[0][0]
     );
 
-    console.log(point);
+    // console.log(point);
     mouse.config.mouseSpeed = 500;
+    moveCameraWithScroll(region.top, region.left, region.width, region.height);
+    console.log(region.top, region.left);
     // Moves mouse towards detected box
     // mouse.move(straightTo(point));
     // .then(async () => {
@@ -57,50 +108,55 @@ export const moveBot = async (filteredBoxes) => {
   }
 };
 
-/**
- * Generates a random point within the bounding box that has a valid colour
- * @param {*} top
- * @param {*} left
- * @param {*} x
- * @param {*} y
- * @param {*} width
- * @param {*} height
- * @returns
- */
-const generatePoint = async (top, left, x, y, width, height) => {
-  let point = new Point(
+const generatePointNoValidation = async (top, left, x, y, width, height) => {
+  return new Point(
     left + x + getRandomInt(width),
     top + y + getRandomInt(height)
   );
-  while (await checkPoint(point)) {
-    point = new Point(
-      left + x + getRandomInt(width),
-      top + y + getRandomInt(height)
-    );
-  }
-  return point;
 };
 
 /**
- * Checks if the colour values of the point are within range
- * @param {*} point
- * @returns
+ *
+ * @param {*} top - top of window on screen
+ * @param {*} left - left of window on screen
+ * @param {*} width
+ * @param {*} height
  */
-const checkPoint = async (point) => {
-  const pixel = await screen.colorAt(point);
-  if (
-    pixel.R < PIXEL_HIGH.R &&
-    pixel.R > PIXEL_LOW.R &&
-    pixel.G < PIXEL_HIGH.G &&
-    pixel.G > PIXEL_LOW.G &&
-    pixel.B < PIXEL_HIGH.B &&
-    pixel.B > PIXEL_LOW.B
-  ) {
-    return true;
-  }
-  return false;
-};
+export const moveCameraWithScroll = async (top, left, width, height) => {
+  const x = width / 6;
+  const y = height / 3;
+  const x_r = (width / 6) * 4;
 
-const getRandomInt = (max) => {
-  return Math.floor(Math.random() * max);
+  const leftPoint = generatePointNoValidation(
+    left,
+    top,
+    x,
+    y + height / 3 / 2,
+    width / 6,
+    height / 3 / 2
+  );
+
+  const rightPoint = generatePointNoValidation(
+    left,
+    top,
+    x_r,
+    y,
+    width / 6,
+    height / 3 / 2
+  );
+  console.log(leftPoint);
+  console.log(rightPoint);
+
+  try {
+    mouse.config.mouseSpeed = 1300;
+    mouse.move(straightTo(leftPoint)).then(async () => {
+      mouse.config.mouseSpeed = 1600;
+      // await mouse.pressButton(Button.MIDDLE);
+      mouse.move(straightTo(rightPoint)).then(async () => {
+        await mouse.releaseButton(Button.MIDDLE);
+      });
+    });
+  } catch (e) {
+    console.log(e);
+  }
 };

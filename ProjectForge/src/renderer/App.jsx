@@ -4,7 +4,8 @@ import { io } from "socket.io-client";
 import getFrameData from "./canvas/getFrameData.js";
 import { Button } from "@/components/ui/button";
 import "./App.css";
-import PlayerInfo from "./components/playerInfo.component.jsx";
+import PlayerInfo from "./components/playerInfo/playerInfo.component.jsx";
+import ScreenCapture from "./components/screenCapture/screenCapture.component.jsx";
 
 const modelSocket = io("http://localhost:3000");
 const clientSocket = io.connect("http://localhost:3030", {
@@ -21,10 +22,51 @@ function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const dataRef = useRef(null);
+  const mouseRef = useRef(null);
   const imageCapture = useRef(null);
   const interval = useRef(null);
   const dataContext = useRef(null);
   const canvasContext = useRef(null);
+
+  const getRandomInt = (max) => {
+    return Math.floor(Math.random() * max);
+  };
+
+  const drawMousePoints = () => {
+    const height = currentHeight / 3 / 2;
+    const width = currentWidth / 6;
+    const left = currentWidth / 6;
+    const top = currentHeight / 3;
+    const right = (currentWidth / 6) * 4;
+
+    if (mouseRef.current) {
+      const ctx = mouseRef.current.getContext("2d");
+      ctx.strokeStyle = "#ffe085";
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.2;
+      ctx.strokeRect(
+        currentWidth / 6, //x
+        currentHeight / 3, //y
+        (currentWidth / 6) * 4, //width
+        currentHeight / 3 //height
+      );
+      ctx.strokeStyle = "#AAFF00";
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.5;
+      ctx.strokeRect(
+        getRandomInt(width) + left, //x
+        getRandomInt(height) + (top + height), //y
+        10, //width
+        10 //height
+      );
+      ctx.strokeRect(
+        getRandomInt(width) + right, //x
+        getRandomInt(height) + top, //y
+        10, //width
+        10 //height
+      );
+    }
+  };
 
   /**
    *
@@ -125,10 +167,13 @@ function App() {
           Get Source
         </Button>
         <Button
-          className={isPredicting ? "bg-red-700" : "bg-green-800"}
+          className={isPredicting ? "bg-red-700 m-2" : "bg-green-800 m-2"}
           onClick={() => handlePrediction()}
         >
           {isPredicting ? "Stop Prediction" : "Predict"}
+        </Button>
+        <Button className="m-2" onClick={() => drawMousePoints()}>
+          Draw Mouse Boxes
         </Button>
       </div>
       <div>
@@ -138,23 +183,14 @@ function App() {
           animation={animation}
         ></PlayerInfo>
       </div>
-      <div>
-        <div className="relative block bg-gray-600 w-full h-full">
-          <canvas
-            className="absolute top-0 left-0 z-10"
-            ref={canvasRef}
-            height={currentHeight}
-            width={currentWidth}
-          ></canvas>
-          <video className="absolute top-0 left-0" ref={videoRef}></video>
-        </div>
-      </div>
-      <canvas
-        className="hidden"
-        ref={dataRef}
-        height={currentHeight}
-        width={currentWidth}
-      ></canvas>
+      <ScreenCapture
+        canvasRef={canvasRef}
+        videoRef={videoRef}
+        dataRef={dataRef}
+        mouseRef={mouseRef}
+        currentHeight={currentHeight}
+        currentWidth={currentWidth}
+      ></ScreenCapture>
     </div>
   );
 }

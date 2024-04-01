@@ -3,7 +3,7 @@ import * as path from "node:path"; //gets the path current path from node
 import { fileURLToPath } from "url";
 import getSourceId from "../renderer/video/getSourceId";
 import { io } from "socket.io-client";
-import { moveBot } from "./bot";
+import { moveBot, moveCameraWithScroll } from "./bot";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {

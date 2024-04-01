@@ -16,7 +16,7 @@ const drawBoundingBox = (boundingArray, widthHeight, canvasContext, canvas) => {
   }
   canvasContext.clearRect(0, 0, canvas.width, canvas.height);
   canvasContext.strokeStyle = "#B033FF";
-  canvasContext.lineWidth = 1;
+  canvasContext.lineWidth = 3;
   // Creates a rectangle for each prediction
   for (let i = 0; i < boundingArray.length; i++) {
     canvasContext.strokeRect(
