@@ -1,25 +1,30 @@
-import "./App.css";
 import drawBoundingBox from "./canvas/drawBoundingBox.js";
-import setVideo from "./video/setVideo.react.js";
 import { useState, useRef } from "react";
 import { io } from "socket.io-client";
 import getFrameData from "./canvas/getFrameData.js";
 import { Button } from "@/components/ui/button";
+import "./App.css";
+import PlayerInfo from "./components/playerInfo.component.jsx";
+
+const modelSocket = io("http://localhost:3000");
+const clientSocket = io.connect("http://localhost:3030", {
+  transports: ["websocket"],
+});
 
 function App() {
   const [currentWidth, setWidth] = useState(0);
   const [currentHeight, setHeight] = useState(0);
-  // window.api.drawBoundingBox(drawBoundingBox);
-  const videoRef = useRef();
-  const canvasRef = useRef();
-  const dataRef = useRef();
-  const socket = io("http://localhost:3000");
-  // let sendData = false;
-  let interval;
-  let stream;
-  let imageCapture;
-  let dataContext;
-  let canvasContext;
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [playerPosition, setPlayerPosition] = useState(null);
+  const [cameraPosition, setCameraPosition] = useState(null);
+  const [animation, setAnimation] = useState(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const dataRef = useRef(null);
+  const imageCapture = useRef(null);
+  const interval = useRef(null);
+  const dataContext = useRef(null);
+  const canvasContext = useRef(null);
 
   /**
    *
@@ -28,7 +33,7 @@ function App() {
     try {
       const video = videoRef.current;
       const id = await window.api.getSourceId();
-      stream = await navigator.mediaDevices.getUserMedia({
+      let stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
           mandatory: {
@@ -44,11 +49,11 @@ function App() {
         setWidth(video.clientWidth);
       };
       const videoTrack = stream.getVideoTracks()[0];
-      imageCapture = new ImageCapture(videoTrack);
-      dataContext = dataRef.current.getContext("2d", {
+      imageCapture.current = new ImageCapture(videoTrack);
+      dataContext.current = dataRef.current.getContext("2d", {
         willReadFrequently: true,
       });
-      canvasContext = canvasRef.current.getContext("2d");
+      canvasContext.current = canvasRef.current.getContext("2d");
     } catch (err) {
       console.log(err);
     }
@@ -57,16 +62,21 @@ function App() {
   /**
    * Takes a frame from the data canvas and sends it to the ml server
    */
-  const handleFrame = async () => {
-    if (imageCapture) {
-      if (!interval) {
-        interval = setInterval(async () => {
-          const frame = await getFrameData(imageCapture, dataContext);
-          socket.emit("image", frame);
-        }, 2000);
+  const handlePrediction = async () => {
+    if (imageCapture.current) {
+      if (!interval.current) {
+        interval.current = setInterval(async () => {
+          const frame = await getFrameData(
+            imageCapture.current,
+            dataContext.current
+          );
+          modelSocket.emit("image", frame);
+        }, 1000);
+        setIsPredicting(true);
       } else {
-        clearInterval(interval);
-        interval = null;
+        clearInterval(interval.current);
+        interval.current = null;
+        setIsPredicting(false);
       }
     }
   };
@@ -74,32 +84,73 @@ function App() {
   /**
    * Draws bounding box on screen when a detection is found
    */
-  socket.on("BOUNDING_BOX", (filteredBoxes) => {
-    if (canvasContext) {
+  modelSocket.on("BOUNDING_BOX", (filteredBoxes) => {
+    if (canvasContext.current) {
       const { bounding, widthHeight } = filteredBoxes;
-      drawBoundingBox(bounding, widthHeight, canvasContext, canvasRef.current);
+      drawBoundingBox(
+        bounding,
+        widthHeight,
+        canvasContext.current,
+        canvasRef.current
+      );
     }
   });
 
+  /**
+   *
+   * @param {camera:{x:string,y:string,yaw:string,pitch:string},player:{x:num,y:num},animation:num} data
+   */
+  const onData = (data) => {
+    if (!data) {
+      return;
+    }
+    const jsonData = JSON.parse(data);
+    if (jsonData.hasOwnProperty("player")) {
+      setPlayerPosition(jsonData.player);
+    }
+    if (jsonData.hasOwnProperty("camera")) {
+      setCameraPosition(jsonData.camera);
+    }
+    if (jsonData.hasOwnProperty("animation")) {
+      setAnimation(jsonData.animation);
+    }
+  };
+
+  clientSocket.on("data", onData);
+
   return (
-    <div>
-      <div className="button-box">
+    <div className="flex flex-col">
+      <div>
         <Button className="m-2" onClick={() => handleStream()}>
           Get Source
         </Button>
-        <Button onClick={() => handleFrame()}>Predict</Button>
+        <Button
+          className={isPredicting ? "bg-red-700" : "bg-green-800"}
+          onClick={() => handlePrediction()}
+        >
+          {isPredicting ? "Stop Prediction" : "Predict"}
+        </Button>
       </div>
-      <div className="video-box">
-        <canvas
-          className="overlay-canvas"
-          ref={canvasRef}
-          height={currentHeight}
-          width={currentWidth}
-        ></canvas>
-        <video className="video-player" ref={videoRef}></video>
+      <div>
+        <PlayerInfo
+          playerPosition={playerPosition}
+          cameraPosition={cameraPosition}
+          animation={animation}
+        ></PlayerInfo>
+      </div>
+      <div>
+        <div className="relative block bg-gray-600 w-full h-full">
+          <canvas
+            className="absolute top-0 left-0 z-10"
+            ref={canvasRef}
+            height={currentHeight}
+            width={currentWidth}
+          ></canvas>
+          <video className="absolute top-0 left-0" ref={videoRef}></video>
+        </div>
       </div>
       <canvas
-        className="data-canvas"
+        className="hidden"
         ref={dataRef}
         height={currentHeight}
         width={currentWidth}

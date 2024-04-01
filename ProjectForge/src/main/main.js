@@ -64,7 +64,7 @@ const onBoundingBox = (filteredBoxes) => {
 };
 
 let clientData = { x: null, y: null };
-const onGameTick = async (data) => {
+const onGameTick = (data) => {
   clientData = JSON.parse(data);
 };
 
@@ -81,7 +81,6 @@ app.whenReady().then(() => {
   let position = null;
   setInterval(async () => {
     try {
-      // console.log(clientData);
       if (
         !position ||
         (position.x === clientData.player.x &&

@@ -19,7 +19,7 @@ const model = await warmUpModel();
 io.on("connection", async (socket) => {
   console.log(socket.id);
   socket.on("image", (image) => {
-    console.log("predicting");
+    console.log("predicting...");
     if (!image) {
       return;
     }
@@ -46,7 +46,7 @@ io.on("connection", async (socket) => {
         filteredBoxes.detectionClass.push(detectionClass[index]);
       }
       // only send if there are detected items
-      console.log(filteredBoxes);
+      console.log(filteredBoxes.bounding);
       io.emit("BOUNDING_BOX", filteredBoxes);
     }
   });

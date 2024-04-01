@@ -6,6 +6,14 @@
  * @param {*} canvasContext
  */
 const drawBoundingBox = (boundingArray, widthHeight, canvasContext, canvas) => {
+  if (
+    boundingArray.length === 0 ||
+    widthHeight.length === 0 ||
+    !canvas ||
+    !canvasContext
+  ) {
+    return;
+  }
   canvasContext.clearRect(0, 0, canvas.width, canvas.height);
   canvasContext.strokeStyle = "#B033FF";
   canvasContext.lineWidth = 1;
