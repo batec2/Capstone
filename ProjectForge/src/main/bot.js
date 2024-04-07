@@ -52,6 +52,16 @@ const generatePoint = async (top, left, x, y, width, height) => {
   return point;
 };
 
+/**
+ *
+ * @param {*} top
+ * @param {*} left
+ * @param {*} x
+ * @param {*} y
+ * @param {*} width
+ * @param {*} height
+ * @returns
+ */
 const generatePointNoValidation = async (top, left, x, y, width, height) => {
   console.log(
     `top: ${top} left: ${left} x: ${x} y: ${y} width: ${width} height: ${height}`
@@ -104,6 +114,11 @@ export const moveCameraWithScroll = async (top, left, width, height) => {
   }
 };
 
+/**
+ *
+ * @param {bounding,widthHeight} box
+ * @param {*} region
+ */
 const moveMouseToBox = async ({ bounding, widthHeight }, region) => {
   const point = await generatePoint(
     region.top,
@@ -167,8 +182,14 @@ export class Bot {
       return;
     }
     if (currentDetection.bounding.length === 0) {
+      if (this.cameraLoop) {
+        return;
+      }
       this.startCameraLoop();
     } else if (currentDetection.bounding.length > 0) {
+      if (this.mouseLoop) {
+        return;
+      }
       this.startMouseLoop();
     }
   }
@@ -178,11 +199,8 @@ export class Bot {
    * @returns
    */
   startCameraLoop() {
-    if (this.cameraLoop) {
-      return;
-    }
     this.clearMouseLoop();
-    this.cameraLoop = setInterval(async () => {
+    this.cameraLoop = setTimeout(async () => {
       console.log("moving camera");
       await moveCameraWithScroll(
         this.region.top,
@@ -190,6 +208,7 @@ export class Bot {
         this.region.width,
         this.region.height
       );
+      this.startCameraLoop();
     }, this.cameraInterval);
   }
 
@@ -198,23 +217,21 @@ export class Bot {
    * @returns
    */
   startMouseLoop() {
-    if (this.mouseLoop) {
-      return;
-    }
     this.clearCameraLoop();
-    this.mouseLoop = setInterval(async () => {
+    this.mouseLoop = setTimeout(async () => {
       console.log("Moving mouse");
       moveMouseToBox(this.currentDetection, this.region);
+      this.startMouseLoop();
     }, this.mouseInterval);
   }
 
   clearMouseLoop() {
-    clearInterval(this.mouseLoop);
+    clearTimeout(this.mouseLoop);
     this.mouseLoop = null;
   }
 
   clearCameraLoop() {
-    clearInterval(this.cameraLoop);
+    clearTimeout(this.cameraLoop);
     this.cameraLoop = null;
   }
 
