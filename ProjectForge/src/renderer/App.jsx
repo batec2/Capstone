@@ -181,7 +181,7 @@ function App() {
           Draw Mouse Boxes
         </Button>
         <Button
-          className="m-2"
+          className={isBotRunning ? "bg-red-700 m-2" : "bg-green-800 m-2"}
           onClick={() => {
             setIsBotRunning((running) => !running);
             window.api.startStopBot();

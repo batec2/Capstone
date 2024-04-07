@@ -63,7 +63,7 @@ const onBoundingBox = (filteredBoxes) => {
   currentDetection = filteredBoxes;
 };
 
-let clientData = { x: null, y: null };
+let clientData = null;
 const onGameTick = (data) => {
   clientData = JSON.parse(data);
 };
@@ -94,7 +94,8 @@ ipcMain.handle("GET_SOURCE", async () => {
 });
 
 let botInterval = null;
-let position = null;
+let movingLoop = null;
+let cameraLoop = null;
 ipcMain.handle("START_STOP_BOT", () => {
   console.log(!botInterval);
   if (botInterval) {
@@ -106,18 +107,27 @@ ipcMain.handle("START_STOP_BOT", () => {
   console.log("Starting Bot");
 
   botInterval = setInterval(async () => {
+    const { camera, player, moving, animation } = clientData;
     try {
-      if (
-        !position ||
-        (position.x === clientData.player.x &&
-          position.y === clientData.player.y &&
-          clientData.animation === -1)
-      ) {
-        await moveBot(currentDetection);
+      if (!clientData) {
+        return;
       }
-      position = clientData.player;
+      if (moving && !(animation === -1)) {
+        return;
+      }
+      if (!movingLoop && currentDetection.bounding.length === 0) {
+        // Move Camera
+        console.log("move camera");
+        clearInterval(movingLoop);
+        movingLoop = null;
+      } else if (!cameraLoop && currentDetection.bounding.length > 0) {
+        // Move Mouse
+        console.log("move mouse");
+        clearInterval(cameraLoop);
+        cameraLoop = null;
+      }
     } catch (e) {
       console.log(e);
     }
-  }, 5000);
+  }, 1000);
 });
