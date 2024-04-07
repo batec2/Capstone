@@ -11,7 +11,7 @@ import "./playerInfo.styles.css";
 
 const PlayerInfo = ({ playerPosition, cameraPosition, animation }) => {
   return (
-    <Card className="w-60">
+    <Card className="w-60 h-[532px]">
       <CardHeader>
         <CardTitle>Player Information</CardTitle>
         <CardDescription>Various information on player state</CardDescription>

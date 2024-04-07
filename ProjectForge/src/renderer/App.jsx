@@ -18,6 +18,7 @@ function App() {
   const [isPredicting, setIsPredicting] = useState(false);
   const [playerPosition, setPlayerPosition] = useState(null);
   const [cameraPosition, setCameraPosition] = useState(null);
+  const [isCaptured, setIsCaptured] = useState(false);
   const [animation, setAnimation] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -161,8 +162,8 @@ function App() {
   clientSocket.on("data", onData);
 
   return (
-    <div className="flex flex-col">
-      <div>
+    <div className="bg-red h-[900px]">
+      <div className="flex flex-row">
         <Button className="m-2" onClick={() => handleStream()}>
           Get Source
         </Button>
@@ -176,21 +177,24 @@ function App() {
           Draw Mouse Boxes
         </Button>
       </div>
-      <div>
-        <PlayerInfo
-          playerPosition={playerPosition}
-          cameraPosition={cameraPosition}
-          animation={animation}
-        ></PlayerInfo>
+      <div className="flex flex-row">
+        <div className="flex flex-col">
+          <PlayerInfo
+            playerPosition={playerPosition}
+            cameraPosition={cameraPosition}
+            animation={animation}
+          ></PlayerInfo>
+        </div>
+        {/* <video ref={videoRef}></video> */}
+        <ScreenCapture
+          canvasRef={canvasRef}
+          videoRef={videoRef}
+          dataRef={dataRef}
+          mouseRef={mouseRef}
+          currentHeight={currentHeight}
+          currentWidth={currentWidth}
+        ></ScreenCapture>
       </div>
-      <ScreenCapture
-        canvasRef={canvasRef}
-        videoRef={videoRef}
-        dataRef={dataRef}
-        mouseRef={mouseRef}
-        currentHeight={currentHeight}
-        currentWidth={currentWidth}
-      ></ScreenCapture>
     </div>
   );
 }
