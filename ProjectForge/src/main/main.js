@@ -3,7 +3,10 @@ import * as path from "node:path"; //gets the path current path from node
 import { fileURLToPath } from "url";
 import getSourceId from "../renderer/video/getSourceId";
 import { io } from "socket.io-client";
-import { moveBot, moveCameraWithScroll } from "./bot";
+import { Bot, moveBot, moveCameraWithScroll } from "./bot";
+import { getWindows, windowWithTitle } from "@nut-tree/nut-js";
+import { findWindow, focusWindow } from "./windows";
+import { clearInterval } from "node:timers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -68,13 +71,14 @@ const onGameTick = (data) => {
   clientData = JSON.parse(data);
 };
 
+let bot = null;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
-  // createBotWindow();
-
+  const window = await findWindow();
+  bot = new Bot(window);
   modelSocket.on("BOUNDING_BOX", onBoundingBox);
   clientSocket.on("data", onGameTick);
 });
@@ -93,41 +97,20 @@ ipcMain.handle("GET_SOURCE", async () => {
   return id;
 });
 
-let botInterval = null;
-let movingLoop = null;
-let cameraLoop = null;
+let botLoop = null;
 ipcMain.handle("START_STOP_BOT", () => {
-  console.log(!botInterval);
-  if (botInterval) {
-    console.log("Stopping Bot");
-    clearInterval(botInterval);
-    botInterval = null;
+  if (!bot) {
+    console.log("error with bot");
     return;
   }
-  console.log("Starting Bot");
-
-  botInterval = setInterval(async () => {
-    const { camera, player, moving, animation } = clientData;
-    try {
-      if (!clientData) {
-        return;
-      }
-      if (moving && !(animation === -1)) {
-        return;
-      }
-      if (!movingLoop && currentDetection.bounding.length === 0) {
-        // Move Camera
-        console.log("move camera");
-        clearInterval(movingLoop);
-        movingLoop = null;
-      } else if (!cameraLoop && currentDetection.bounding.length > 0) {
-        // Move Mouse
-        console.log("move mouse");
-        clearInterval(cameraLoop);
-        cameraLoop = null;
-      }
-    } catch (e) {
-      console.log(e);
-    }
+  if (botLoop) {
+    console.log("Stopping Bot");
+    bot.clearAllLoops();
+    clearInterval(botLoop);
+    botLoop = null;
+    return;
+  }
+  botLoop = setInterval(() => {
+    bot.runBot(currentDetection, clientData);
   }, 1000);
 });

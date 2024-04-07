@@ -18,6 +18,7 @@ function App() {
   const [isPredicting, setIsPredicting] = useState(false);
   const [playerPosition, setPlayerPosition] = useState(null);
   const [cameraPosition, setCameraPosition] = useState(null);
+  const [isMoving, setMoving] = useState(null);
   const [isCaptured, setIsCaptured] = useState(false);
   const [isBotRunning, setIsBotRunning] = useState(false);
   const [animation, setAnimation] = useState(null);
@@ -158,6 +159,9 @@ function App() {
     if (jsonData.hasOwnProperty("animation")) {
       setAnimation(jsonData.animation);
     }
+    if (jsonData.hasOwnProperty("moving")) {
+      setMoving(jsonData.moving);
+    }
   };
 
   clientSocket.on("data", onData);
@@ -196,6 +200,7 @@ function App() {
             playerPosition={playerPosition}
             cameraPosition={cameraPosition}
             animation={animation}
+            isMoving={isMoving}
           ></PlayerInfo>
         </div>
         {/* <video ref={videoRef}></video> */}

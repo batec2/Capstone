@@ -9,7 +9,12 @@ import { Label } from "@/components/ui/label.jsx";
 import { Separator } from "@/components/ui/separator.jsx";
 import "./playerInfo.styles.css";
 
-const PlayerInfo = ({ playerPosition, cameraPosition, animation }) => {
+const PlayerInfo = ({
+  playerPosition,
+  cameraPosition,
+  animation,
+  isMoving,
+}) => {
   return (
     <Card className="w-60 h-[532px]">
       <CardHeader>
@@ -25,6 +30,14 @@ const PlayerInfo = ({ playerPosition, cameraPosition, animation }) => {
         <div className="info-line">
           <p className="mr-2">{"Y Position:"}</p>
           <p> {playerPosition ? `${playerPosition.y}` : "No Data"}</p>
+        </div>
+        <div className="info-line">
+          <p className="mr-2 font-semibold">{"Moving:"}</p>
+          <p> {`${isMoving}`}</p>
+        </div>
+        <div className="info-line">
+          <p className="mr-2 font-semibold">{"Animation:"}</p>
+          <p> {animation ? `${animation}` : "No Data"}</p>
         </div>
         <Separator orientation="horizontal"></Separator>
         <Label className="font-bold text-lg">Camera Position</Label>
@@ -50,11 +63,6 @@ const PlayerInfo = ({ playerPosition, cameraPosition, animation }) => {
             <p className="mr-2 font-semibold">{"Pitch:"}</p>
             <p> {cameraPosition ? `${cameraPosition.pitch}` : "No Data"}</p>
           </div>
-        </div>
-        <Separator orientation="horizontal"></Separator>
-        <div className="info-line">
-          <p className="mr-2 font-semibold">{"Animation:"}</p>
-          <p> {animation ? `${animation}` : "No Data"}</p>
         </div>
       </CardContent>
     </Card>

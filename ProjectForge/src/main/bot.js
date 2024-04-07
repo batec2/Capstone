@@ -9,6 +9,7 @@ import {
   Key,
   Button,
 } from "@nut-tree/nut-js";
+import { focusWindow } from "./windows";
 
 const PIXEL_HIGH = { R: 56, G: 127, B: 32, A: 255 };
 const PIXEL_LOW = { R: 25, G: 101, B: 14, A: 255 };
@@ -166,3 +167,81 @@ export const moveCameraWithScroll = async (top, left, width, height) => {
     console.log(e);
   }
 };
+
+export class Bot {
+  mouseLoop = null;
+  cameraLoop = null;
+  window = null;
+
+  constructor(window) {
+    this.window = window;
+  }
+
+  get window() {
+    return this.window;
+  }
+
+  focusWindow() {
+    focusWindow(this.window);
+  }
+
+  /**
+   *
+   * @param {*} currentDetection
+   * @param {*} clientData
+   */
+  runBot(currentDetection, clientData) {
+    const { camera, player, moving, animation } = clientData;
+    // if()
+    if (!clientData || moving || !(animation === -1)) {
+      this.clearAllLoops();
+      return;
+    }
+    if (currentDetection.bounding.length === 0) {
+      this.startCameraLoop();
+    } else if (currentDetection.bounding.length > 0) {
+      this.startMouseLoop();
+    }
+  }
+
+  /**
+   * Sets a Interval to the camera
+   * @returns
+   */
+  startCameraLoop() {
+    if (this.cameraLoop) {
+      return;
+    }
+    this.cameraLoop = setInterval(() => {
+      console.log("moving mouse");
+    }, 1000);
+  }
+
+  /**
+   * sets an interval to move the mouse
+   * @returns
+   */
+  startMouseLoop() {
+    if (this.mouseLoop) {
+      return;
+    }
+    this.mouseLoop = setInterval(() => {
+      console.log("moving camera");
+    }, 1000);
+  }
+
+  clearMouseLoop() {
+    clearInterval(this.mouseLoop);
+    this.mouseLoop = null;
+  }
+
+  clearCameraLoop() {
+    clearInterval(this.cameraLoop);
+    this.cameraLoop = null;
+  }
+
+  clearAllLoops() {
+    this.clearCameraLoop();
+    this.clearMouseLoop();
+  }
+}
