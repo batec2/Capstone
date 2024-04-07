@@ -1,0 +1,46 @@
+plugins {
+	id 'java'
+	id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+repositories {
+	mavenLocal()
+	maven {
+		url = 'https://repo.runelite.net'
+	}
+	mavenCentral()
+}
+
+def runeLiteVersion = 'latest.release'
+
+dependencies {
+	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+	testImplementation 'junit:junit:4.12'
+	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
+	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+	// https://mvnrepository.com/artifact/com.corundumstudio.socketio/netty-socketio
+	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.9'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+	options.release.set(11)
+}
+
+// To create a shadow jar, run `gradlew shadowJar`
+// Output will be in build/libs
+// Run it with `java -jar -ea <name>.jar`
+shadowJar {
+	from sourceSets.test.output
+	configurations = [project.configurations.testRuntimeClasspath]
+	manifest {
+		attributes "Main-Class": "socket.SocketPluginTest"
+	}
+}
