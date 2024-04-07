@@ -21,4 +21,7 @@ contextBridge.exposeInMainWorld("api", {
       console.log(err);
     }
   },
+  startStopBot: () => {
+    ipcRenderer.invoke("START_STOP_BOT");
+  },
 });

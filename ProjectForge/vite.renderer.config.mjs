@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import { pluginExposeRenderer } from "./vite.base.config.mjs";
 import react from "@vitejs/plugin-react";
-import { resolve } from "path";
+import path from "path";
 
 // https://vitejs.dev/config
 export default defineConfig((env) => {
@@ -22,6 +22,9 @@ export default defineConfig((env) => {
     plugins: [pluginExposeRenderer(name), react()],
     resolve: {
       preserveSymlinks: true,
+      alias: {
+        "@": path.resolve(__dirname, "./src/"),
+      },
     },
     clearScreen: false,
   };

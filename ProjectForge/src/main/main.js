@@ -1,9 +1,11 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Tray } from "electron";
 import * as path from "node:path"; //gets the path current path from node
 import { fileURLToPath } from "url";
 import getSourceId from "../renderer/video/getSourceId";
 import { io } from "socket.io-client";
-import { moveBot } from "./bot";
+import { Bot } from "./bot";
+import { findWindow } from "./windows";
+import { clearInterval } from "node:timers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -20,14 +22,16 @@ const clientSocket = io.connect("http://localhost:3030", {
   transports: ["websocket"],
 });
 
-const createWindow = () => {
+const createWindow = (iconPath) => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 870,
+    width: 1100,
     height: 870,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    icon: iconPath,
+    autoHideMenuBar: true,
   });
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -36,7 +40,7 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/index.html`));
   }
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools({ mode: "detach" });
 };
 
 const createBotWindow = () => {
@@ -63,31 +67,21 @@ const onBoundingBox = (filteredBoxes) => {
   currentDetection = filteredBoxes;
 };
 
-let previousPosition = { x: null, y: null };
-const onGameTick = async (data) => {
-  const dataJSON = JSON.parse(data);
-  const { camera, player, animation } = dataJSON;
-  // Activates bot only if the player hasnt moved for 1 tick and not in a
-  // animation
-  // console.log(player, animation);
-  if (
-    player.x === previousPosition.x &&
-    player.y === previousPosition.y &&
-    animation === -1
-  ) {
-    // console.log("moving");
-    await moveBot(currentDetection);
-  }
-  previousPosition = player;
+let clientData = null;
+const onGameTick = (data) => {
+  clientData = JSON.parse(data);
 };
 
+let bot = null;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  createWindow();
-  // createBotWindow();
-
+app.whenReady().then(async () => {
+  const iconPath = path.join(__dirname, "../../../assets/robot.png");
+  const tray = new Tray(iconPath);
+  createWindow(iconPath);
+  const window = await findWindow();
+  bot = new Bot(window);
   modelSocket.on("BOUNDING_BOX", onBoundingBox);
   clientSocket.on("data", onGameTick);
 });
@@ -104,4 +98,24 @@ app.on("window-all-closed", () => {
 ipcMain.handle("GET_SOURCE", async () => {
   const id = await getSourceId();
   return id;
+});
+
+let botLoop = null;
+ipcMain.handle("START_STOP_BOT", async () => {
+  if (!bot) {
+    console.log("error with bot");
+    return;
+  }
+  await bot.focusWindow();
+  await bot.setRegion();
+  if (botLoop) {
+    console.log("Stopping Bot");
+    bot.clearAllLoops();
+    clearInterval(botLoop);
+    botLoop = null;
+    return;
+  }
+  botLoop = setInterval(() => {
+    bot.runBot(currentDetection, clientData);
+  }, 1000);
 });
