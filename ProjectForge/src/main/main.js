@@ -98,11 +98,13 @@ ipcMain.handle("GET_SOURCE", async () => {
 });
 
 let botLoop = null;
-ipcMain.handle("START_STOP_BOT", () => {
+ipcMain.handle("START_STOP_BOT", async () => {
   if (!bot) {
     console.log("error with bot");
     return;
   }
+  await bot.focusWindow();
+  await bot.setRegion();
   if (botLoop) {
     console.log("Stopping Bot");
     bot.clearAllLoops();

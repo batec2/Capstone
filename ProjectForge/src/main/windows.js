@@ -11,14 +11,13 @@ export const findWindow = async () => {
   return null;
 };
 
-export const focusWindow = (window) => {
+export const focusWindow = async (window) => {
   if (!window) {
     return null;
   }
   try {
-    window.focus();
+    await window.focus();
   } catch (e) {
-    console.log("FAILED:" + e);
-    return null;
+    throw e;
   }
 };
