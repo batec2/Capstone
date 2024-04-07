@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO</title>
+</head>
+<body>
+    <h1>Socket.IO</h1>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const sio = io();
+
+        sio.on('connect', () => {
+            console.log('connected to PythonServer');
+            sio.emit('points', {start: [1086, 58], end: [344, 414]});
+        });
+
+        sio.on('disconnect', () => {
+            console.log('disconnected from PythonServer');
+        });
+
+        sio.on('points_result', (data) => {
+            console.log(data);
+        });
+        
+    </script>
+</body>
+</html>
