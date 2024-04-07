@@ -1,14 +1,4 @@
-import {
-  mouse,
-  straightTo,
-  Point,
-  getActiveWindow,
-  windowWithTitle,
-  screen,
-  keyboard,
-  Key,
-  Button,
-} from "@nut-tree/nut-js";
+import { mouse, straightTo, Point, screen, Button } from "@nut-tree/nut-js";
 import { focusWindow } from "./windows";
 
 const PIXEL_HIGH = { R: 56, G: 127, B: 32, A: 255 };
@@ -60,58 +50,6 @@ const generatePoint = async (top, left, x, y, width, height) => {
     );
   }
   return point;
-};
-
-export const moveBot = async (filteredBoxes) => {
-  try {
-    const windowRef = await getActiveWindow();
-    const region = await windowRef.region;
-    const title = await windowRef.title;
-
-    if (!title.includes("RuneLite") || !filteredBoxes) {
-      // moveCameraWithScroll(region.width, region.height);
-      return;
-    }
-
-    // Turns camera if there are no detections
-    if (filteredBoxes.bounding.length === 0) {
-      console.log("Moving Camera");
-      moveCameraWithScroll(
-        region.top,
-        region.left,
-        region.width,
-        region.height
-      );
-      return;
-    }
-
-    /**
-     * bounding[0][1]: x position of top left
-     * widthHeight[0][1]: width
-     * bounding[0][0]: y position
-     * widthHeight[0][1]: height
-     */
-    const { bounding, widthHeight } = filteredBoxes;
-
-    const point = await generatePoint(
-      region.top,
-      region.left,
-      bounding[0][1],
-      bounding[0][0],
-      widthHeight[0][1],
-      widthHeight[0][0]
-    );
-
-    // console.log(point);
-    console.log(region.top, region.left);
-    // Moves mouse towards detected box
-    // mouse.move(straightTo(point));
-    // .then(async () => {
-    //   await mouse.leftClick();
-    // });
-  } catch (e) {
-    console.log(e);
-  }
 };
 
 const generatePointNoValidation = async (top, left, x, y, width, height) => {
@@ -188,6 +126,8 @@ export class Bot {
   window = null;
   region = null;
   currentDetection = null;
+  mouseInterval = 2500;
+  cameraInterval = 2500;
 
   constructor(window) {
     this.window = window;
@@ -244,19 +184,13 @@ export class Bot {
     this.clearMouseLoop();
     this.cameraLoop = setInterval(async () => {
       console.log("moving camera");
-      console.log(
-        this.region.top,
-        this.region.left,
-        this.region.width,
-        this.region.height
-      );
       await moveCameraWithScroll(
         this.region.top,
         this.region.left,
         this.region.width,
         this.region.height
       );
-    }, 5000);
+    }, this.cameraInterval);
   }
 
   /**
@@ -271,7 +205,7 @@ export class Bot {
     this.mouseLoop = setInterval(async () => {
       console.log("Moving mouse");
       moveMouseToBox(this.currentDetection, this.region);
-    }, 5000);
+    }, this.mouseInterval);
   }
 
   clearMouseLoop() {

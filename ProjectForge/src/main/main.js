@@ -1,11 +1,10 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Tray } from "electron";
 import * as path from "node:path"; //gets the path current path from node
 import { fileURLToPath } from "url";
 import getSourceId from "../renderer/video/getSourceId";
 import { io } from "socket.io-client";
-import { Bot, moveBot, moveCameraWithScroll } from "./bot";
-import { getWindows, windowWithTitle } from "@nut-tree/nut-js";
-import { findWindow, focusWindow } from "./windows";
+import { Bot } from "./bot";
+import { findWindow } from "./windows";
 import { clearInterval } from "node:timers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -23,14 +22,16 @@ const clientSocket = io.connect("http://localhost:3030", {
   transports: ["websocket"],
 });
 
-const createWindow = () => {
+const createWindow = (iconPath) => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 870,
+    width: 1100,
     height: 870,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    icon: iconPath,
+    autoHideMenuBar: true,
   });
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -76,7 +77,9 @@ let bot = null;
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  createWindow();
+  const iconPath = path.join(__dirname, "../../../assets/robot.png");
+  const tray = new Tray(iconPath);
+  createWindow(iconPath);
   const window = await findWindow();
   bot = new Bot(window);
   modelSocket.on("BOUNDING_BOX", onBoundingBox);
