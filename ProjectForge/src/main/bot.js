@@ -74,6 +74,13 @@ export const moveBot = async (filteredBoxes) => {
 
     // Turns camera if there are no detections
     if (filteredBoxes.bounding.length === 0) {
+      console.log("Moving Camera");
+      moveCameraWithScroll(
+        region.top,
+        region.left,
+        region.width,
+        region.height
+      );
       return;
     }
 
@@ -95,8 +102,6 @@ export const moveBot = async (filteredBoxes) => {
     );
 
     // console.log(point);
-    mouse.config.mouseSpeed = 500;
-    moveCameraWithScroll(region.top, region.left, region.width, region.height);
     console.log(region.top, region.left);
     // Moves mouse towards detected box
     // mouse.move(straightTo(point));
@@ -109,6 +114,9 @@ export const moveBot = async (filteredBoxes) => {
 };
 
 const generatePointNoValidation = async (top, left, x, y, width, height) => {
+  console.log(
+    `top: ${top} left: ${left} x: ${x} y: ${y} width: ${width} height: ${height}`
+  );
   return new Point(
     left + x + getRandomInt(width),
     top + y + getRandomInt(height)
@@ -128,8 +136,8 @@ export const moveCameraWithScroll = async (top, left, width, height) => {
   const x_r = (width / 6) * 4;
 
   const leftPoint = generatePointNoValidation(
-    left,
     top,
+    left,
     x,
     y + height / 3 / 2,
     width / 6,
@@ -137,21 +145,19 @@ export const moveCameraWithScroll = async (top, left, width, height) => {
   );
 
   const rightPoint = generatePointNoValidation(
-    left,
     top,
+    left,
     x_r,
     y,
     width / 6,
     height / 3 / 2
   );
-  console.log(leftPoint);
-  console.log(rightPoint);
 
   try {
     mouse.config.mouseSpeed = 1300;
     mouse.move(straightTo(leftPoint)).then(async () => {
       mouse.config.mouseSpeed = 1600;
-      // await mouse.pressButton(Button.MIDDLE);
+      await mouse.pressButton(Button.MIDDLE);
       mouse.move(straightTo(rightPoint)).then(async () => {
         await mouse.releaseButton(Button.MIDDLE);
       });

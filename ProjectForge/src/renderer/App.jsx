@@ -19,6 +19,7 @@ function App() {
   const [playerPosition, setPlayerPosition] = useState(null);
   const [cameraPosition, setCameraPosition] = useState(null);
   const [isCaptured, setIsCaptured] = useState(false);
+  const [isBotRunning, setIsBotRunning] = useState(false);
   const [animation, setAnimation] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -90,9 +91,9 @@ function App() {
         video.play();
         setHeight(video.clientHeight);
         setWidth(video.clientWidth);
+        setIsCaptured(true);
       };
-      const videoTrack = stream.getVideoTracks()[0];
-      imageCapture.current = new ImageCapture(videoTrack);
+      imageCapture.current = new ImageCapture(stream.getVideoTracks()[0]);
       dataContext.current = dataRef.current.getContext("2d", {
         willReadFrequently: true,
       });
@@ -164,8 +165,11 @@ function App() {
   return (
     <div className="bg-red h-[900px]">
       <div className="flex flex-row">
-        <Button className="m-2" onClick={() => handleStream()}>
-          Get Source
+        <Button
+          className="m-2"
+          onClick={() => (isCaptured ? {} : handleStream())}
+        >
+          {isCaptured ? "Source Captured" : "Get Source"}
         </Button>
         <Button
           className={isPredicting ? "bg-red-700 m-2" : "bg-green-800 m-2"}
@@ -175,6 +179,15 @@ function App() {
         </Button>
         <Button className="m-2" onClick={() => drawMousePoints()}>
           Draw Mouse Boxes
+        </Button>
+        <Button
+          className="m-2"
+          onClick={() => {
+            setIsBotRunning((running) => !running);
+            window.api.startStopBot();
+          }}
+        >
+          {isBotRunning ? "Stop Bot" : "Start Bot"}
         </Button>
       </div>
       <div className="flex flex-row">

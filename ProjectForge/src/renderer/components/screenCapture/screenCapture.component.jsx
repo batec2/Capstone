@@ -10,7 +10,7 @@ const ScreenCapture = ({
 }) => {
   return (
     <>
-      <div className="relative block w-full">
+      <div className="relative block w-full min-w-[1100px]">
         <canvas
           className="absolute top-0 left-0 z-10"
           ref={canvasRef}

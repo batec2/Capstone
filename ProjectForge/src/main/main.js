@@ -77,23 +77,6 @@ app.whenReady().then(() => {
 
   modelSocket.on("BOUNDING_BOX", onBoundingBox);
   clientSocket.on("data", onGameTick);
-
-  let position = null;
-  setInterval(async () => {
-    try {
-      if (
-        !position ||
-        (position.x === clientData.player.x &&
-          position.y === clientData.player.y &&
-          clientData.animation === -1)
-      ) {
-        await moveBot(currentDetection);
-      }
-      position = clientData.player;
-    } catch (e) {
-      console.log(e);
-    }
-  }, 5000);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -108,4 +91,33 @@ app.on("window-all-closed", () => {
 ipcMain.handle("GET_SOURCE", async () => {
   const id = await getSourceId();
   return id;
+});
+
+let botInterval = null;
+let position = null;
+ipcMain.handle("START_STOP_BOT", () => {
+  console.log(!botInterval);
+  if (botInterval) {
+    console.log("Stopping Bot");
+    clearInterval(botInterval);
+    botInterval = null;
+    return;
+  }
+  console.log("Starting Bot");
+
+  botInterval = setInterval(async () => {
+    try {
+      if (
+        !position ||
+        (position.x === clientData.player.x &&
+          position.y === clientData.player.y &&
+          clientData.animation === -1)
+      ) {
+        await moveBot(currentDetection);
+      }
+      position = clientData.player;
+    } catch (e) {
+      console.log(e);
+    }
+  }, 5000);
 });
