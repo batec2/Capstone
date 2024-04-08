@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import "./App.css";
 import PlayerInfo from "./components/playerInfo/playerInfo.component.jsx";
 import ScreenCapture from "./components/screenCapture/screenCapture.component.jsx";
+import ExpCounter from "./components/expCounter/expCounter.jsx";
 
 const modelSocket = io("http://localhost:3000");
 const clientSocket = io.connect("http://localhost:3030", {
@@ -16,12 +17,9 @@ function App() {
   const [currentWidth, setWidth] = useState(0);
   const [currentHeight, setHeight] = useState(0);
   const [isPredicting, setIsPredicting] = useState(false);
-  const [playerPosition, setPlayerPosition] = useState(null);
-  const [cameraPosition, setCameraPosition] = useState(null);
-  const [isMoving, setMoving] = useState(null);
   const [isCaptured, setIsCaptured] = useState(false);
   const [isBotRunning, setIsBotRunning] = useState(false);
-  const [animation, setAnimation] = useState(null);
+  const [currentData, setData] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const dataRef = useRef(null);
@@ -149,19 +147,7 @@ function App() {
     if (!data) {
       return;
     }
-    const jsonData = JSON.parse(data);
-    if (jsonData.hasOwnProperty("player")) {
-      setPlayerPosition(jsonData.player);
-    }
-    if (jsonData.hasOwnProperty("camera")) {
-      setCameraPosition(jsonData.camera);
-    }
-    if (jsonData.hasOwnProperty("animation")) {
-      setAnimation(jsonData.animation);
-    }
-    if (jsonData.hasOwnProperty("moving")) {
-      setMoving(jsonData.moving);
-    }
+    setData(JSON.parse(data));
   };
 
   clientSocket.on("data", onData);
@@ -197,10 +183,10 @@ function App() {
       <div className="flex flex-row">
         <div className="flex flex-col">
           <PlayerInfo
-            playerPosition={playerPosition}
-            cameraPosition={cameraPosition}
-            animation={animation}
-            isMoving={isMoving}
+            playerPosition={currentData ? currentData.player : null}
+            cameraPosition={currentData ? currentData.camera : null}
+            animation={currentData ? currentData.animation : null}
+            isMoving={currentData ? currentData.moving : null}
           ></PlayerInfo>
         </div>
         {/* <video ref={videoRef}></video> */}
@@ -213,6 +199,7 @@ function App() {
           currentWidth={currentWidth}
         ></ScreenCapture>
       </div>
+      <ExpCounter exp={currentData ? currentData.exp : null}></ExpCounter>
     </div>
   );
 }
