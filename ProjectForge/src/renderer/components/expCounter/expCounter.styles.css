@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.info-line {
+  @apply flex bg-slate-500 p-1 rounded-sm bg-opacity-10 mb-1 mt-1;
+}

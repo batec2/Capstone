@@ -17,6 +17,7 @@ public class SocketPanel extends PluginPanel {
     private JCheckBox playerLocationCheckBox;
     private JCheckBox emitDataCheckBox;
 
+    private JCheckBox expCheckBox;
 
     void init(){
         setLayout(new BorderLayout());
@@ -40,6 +41,7 @@ public class SocketPanel extends PluginPanel {
         this.emitDataCheckBox = new JCheckBox("Emit Data");
         this.cameraCheckBox = new JCheckBox("Camera Data");
         this.playerLocationCheckBox = new JCheckBox("Player Location");
+        this.expCheckBox = new JCheckBox("Player Experience");
         container.setBackground(ColorScheme.BRAND_ORANGE);
         container.setLayout(new BoxLayout(container,BoxLayout.Y_AXIS));
         container.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -47,6 +49,7 @@ public class SocketPanel extends PluginPanel {
         container.add(emitDataCheckBox);
         container.add(cameraCheckBox);
         container.add(playerLocationCheckBox);
+        container.add(expCheckBox);
         return container;
     }
 
@@ -68,5 +71,9 @@ public class SocketPanel extends PluginPanel {
 
     public boolean getEmitDataCheckBoxChecked(){
         return emitDataCheckBox.isSelected();
+    }
+
+    public boolean getExpCheckBoxChecked(){
+        return expCheckBox.isSelected();
     }
 }

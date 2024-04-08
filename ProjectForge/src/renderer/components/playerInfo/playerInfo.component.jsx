@@ -16,7 +16,7 @@ const PlayerInfo = ({
   isMoving,
 }) => {
   return (
-    <Card className="w-60 h-[532px]">
+    <Card className="w-60 h-[532px] ml-1 mr-1">
       <CardHeader>
         <CardTitle>Player Information</CardTitle>
         <CardDescription>Various information on player state</CardDescription>

@@ -12,8 +12,10 @@ import net.runelite.api.Client;
 
 import net.runelite.api.GameState;
 import net.runelite.api.Player;
+import net.runelite.api.Skill;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.StatChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -104,7 +106,18 @@ public class SocketPlugin extends Plugin
 		if(socketPanel.getEmitDataCheckBoxChecked()){
 			// emit x,y,yaw,pitch event with camera data every gametick
 			server.getBroadcastOperations()
-					.sendEvent("data", runescapeData.getInfo(socketPanel.getCameraCheckBoxChecked(), socketPanel.getPlayerLocationCheckBoxChecked()));
+					.sendEvent("data",
+							runescapeData.getInfo(
+									socketPanel.getCameraCheckBoxChecked(),
+									socketPanel.getPlayerLocationCheckBoxChecked(),
+									socketPanel.getExpCheckBoxChecked()));
+		}
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged statChanged){
+		if(statChanged.getSkill() == Skill.AGILITY){
+			runescapeData.addAgilityExp(statChanged.getXp());
 		}
 	}
 

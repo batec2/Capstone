@@ -2,27 +2,37 @@ package socket;
 
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.Skill;
 import net.runelite.api.coords.LocalPoint;
 
 public class RunescapeData {
     Client client;
     Player player = null;
+    private int previousX = 0;
+    private int previousY = 0;
+    private Integer initialAgilityExp = null;
+    private int gainedAgilityExp = 0;
     RunescapeData(Client client){
         this.client = client;
     }
-    private int previousX = 0;
-    private int previousY = 0;
-
 
     public void setPlayer() {
         player = client.getLocalPlayer();
     }
 
-    public String getInfo(boolean camera, boolean location){
+    public void addAgilityExp(int exp){
+        if(this.initialAgilityExp == null){
+            this.initialAgilityExp = exp;
+        }
+        this.gainedAgilityExp = exp - initialAgilityExp;
+    }
+
+    public String getInfo(boolean camera, boolean location, boolean exp){
         if(player==null){
             player = client.getLocalPlayer();
         }
-
+        int agilityExp = client.getSkillExperience(Skill.AGILITY);
+//        this.gainedAgilityExp += agilityExp - this.initialAgilityExp;
         String info = "{";
         if(camera) {
             int x = client.getCameraX();
@@ -43,6 +53,10 @@ public class RunescapeData {
             info+= String.format("\"animation\":%d",player.getAnimation());
             previousX = x;
             previousY = y;
+        }
+        if(exp){
+            info+=",";
+            info+= String.format("\"exp\":{\"agility\":%d,\"gainedAgility\":%d}",agilityExp, this.gainedAgilityExp);
         }
         info+="}";
 
