@@ -5,6 +5,7 @@ export const findWindow = async () => {
   for (let window of windows) {
     const title = await window.title;
     if (title.includes("RuneLite")) {
+      console.log("WINDOW:" + title);
       return window;
     }
   }

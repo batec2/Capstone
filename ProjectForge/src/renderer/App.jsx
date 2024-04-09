@@ -82,6 +82,7 @@ function App() {
           mandatory: {
             chromeMediaSource: "desktop",
             chromeMediaSourceId: id,
+            // maxHeight: 532,
           },
         },
       });

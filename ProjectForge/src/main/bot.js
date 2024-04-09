@@ -1,8 +1,10 @@
 import { mouse, straightTo, Point, screen, Button } from "@nut-tree/nut-js";
 import { focusWindow } from "./windows";
+import { io } from "socket.io-client";
 
 const PIXEL_HIGH = { R: 56, G: 127, B: 32, A: 255 };
 const PIXEL_LOW = { R: 25, G: 101, B: 14, A: 255 };
+const PIXEL = { R: 255, G: 0, B: 0, A: 255 };
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
@@ -15,14 +17,7 @@ const getRandomInt = (max) => {
  */
 const checkPoint = async (point) => {
   const pixel = await screen.colorAt(point);
-  if (
-    pixel.R < PIXEL_HIGH.R &&
-    pixel.R > PIXEL_LOW.R &&
-    pixel.G < PIXEL_HIGH.G &&
-    pixel.G > PIXEL_LOW.G &&
-    pixel.B < PIXEL_HIGH.B &&
-    pixel.B > PIXEL_LOW.B
-  ) {
+  if (pixel.R === PIXEL.R && pixel.G === PIXEL.G && pixel.B === PIXEL.B) {
     return true;
   }
   return false;
@@ -39,16 +34,15 @@ const checkPoint = async (point) => {
  * @returns
  */
 const generatePoint = async (top, left, x, y, width, height) => {
-  let point = new Point(
-    left + x + getRandomInt(width),
-    top + y + getRandomInt(height)
-  );
-  while (await checkPoint(point)) {
+  let point;
+  let check = false;
+  do {
     point = new Point(
       left + x + getRandomInt(width),
       top + y + getRandomInt(height)
     );
-  }
+    check = await checkPoint(point);
+  } while (check === false);
   return point;
 };
 
@@ -114,22 +108,59 @@ export const moveCameraWithScroll = async (top, left, width, height) => {
   }
 };
 
+const moveMouse = async (points) => {
+  for (let i = 0; i < points.length; i++) {
+    try {
+      let point = new Point(points[i][0], points[i][1]);
+      await mouse.move(straightTo(point));
+      point = null;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  console.log("done Moving");
+  return;
+};
+
 /**
  *
  * @param {bounding,widthHeight} box
  * @param {*} region
  */
-const moveMouseToBox = async ({ bounding, widthHeight }, region) => {
-  const point = await generatePoint(
-    region.top,
-    region.left,
-    bounding[0][1],
-    bounding[0][0],
-    widthHeight[0][1],
-    widthHeight[0][0]
-  );
-
-  console.log(region.top, region.left);
+const moveMouseToBox = async (
+  { bounding, widthHeight },
+  region,
+  mouseSocket
+) => {
+  let point;
+  try {
+    point = await generatePoint(
+      region.top,
+      region.left,
+      bounding[0][1],
+      bounding[0][0],
+      widthHeight[0][1],
+      widthHeight[0][0]
+    );
+  } catch (e) {
+    console.log;
+  }
+  if (!point) {
+    return;
+  }
+  const currentPos = await mouse.getPosition();
+  // mouseSocket.emit(
+  //   "points",
+  //   { start: [currentPos.x, currentPos.y], end: [point.x, point.y] },
+  //   async (points) => {
+  //     try {
+  //       await moveMouse(points);
+  //       await mouse.leftClick();
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //   }
+  // );
   // Moves mouse towards detected box
   await mouse.move(straightTo(point));
   await mouse.leftClick();
@@ -141,11 +172,13 @@ export class Bot {
   window = null;
   region = null;
   currentDetection = null;
-  mouseInterval = 2500;
-  cameraInterval = 2500;
+  mouseInterval = 1200;
+  cameraInterval = 1500;
+  mouseSocket = null;
 
   constructor(window) {
     this.window = window;
+    this.mouseSocket = io.connect("http://localhost:8000");
   }
 
   get window() {
@@ -155,6 +188,7 @@ export class Bot {
   async setRegion() {
     try {
       this.region = await this.window.region;
+      // console.log(this.region);
     } catch (e) {
       console.log(e);
     }
@@ -162,6 +196,7 @@ export class Bot {
 
   async focusWindow() {
     try {
+      // console.log(this.window);
       await focusWindow(this.window);
     } catch (e) {
       console.log(e);
@@ -220,7 +255,7 @@ export class Bot {
     this.clearCameraLoop();
     this.mouseLoop = setTimeout(async () => {
       console.log("Moving mouse");
-      moveMouseToBox(this.currentDetection, this.region);
+      moveMouseToBox(this.currentDetection, this.region, this.mouseSocket);
       this.startMouseLoop();
     }, this.mouseInterval);
   }

@@ -2,13 +2,15 @@ import { parentPort } from "worker_threads";
 import * as tf from "@tensorflow/tfjs-node-gpu";
 import * as tfTools from "./tfTools.js";
 
+const CONF_THRESH = 0.75;
 /**
  * Gives the model a dummy input to 'warm' it up and get it ready for execution
  * @param {} model
  */
 export const warmUpModel = async () => {
-  const modelLocation =
-    "./model/yolov7_agility/weights/tf/agility_web_model/model.json";
+  const modelLocation = "./model/tf/agility_web_model/model.json";
+  // const modelLocation =
+  //   "./model/yolov7_agility/weights/tf/agility_web_model/model.json";
   const handler = tf.io.fileSystem(modelLocation);
   const model = await tf.loadGraphModel(handler);
   const dummyInput = tf.ones(model.inputs[0].shape);
@@ -28,7 +30,7 @@ const getPrediction = (frame, model) => {
   const boundingArrays = output.arraySync();
   const results = [];
   for (let i = 0; i < boundingArrays[0].length; i++) {
-    if (boundingArrays[0][i][4] >= 0.9) {
+    if (boundingArrays[0][i][4] >= CONF_THRESH) {
       results.push(boundingArrays[0][i]);
     }
   }
