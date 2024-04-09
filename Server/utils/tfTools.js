@@ -106,7 +106,7 @@ export const nonMaxSuppression = (results) => {
       scores,
       5,
       0.5,
-      0.8,
+      0.75,
       1 //0 normal NMS/1 softNMS
     );
     const selected = box.selectedIndices.dataSync();

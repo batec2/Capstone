@@ -101,6 +101,17 @@ ipcMain.handle("GET_SOURCE", async () => {
 });
 
 let botLoop = null;
+let continueRunning = false;
+const mainLoop = () => {
+  if (continueRunning === false) {
+    return;
+  }
+  botLoop = setTimeout(() => {
+    bot.runBot(currentDetection, clientData);
+    mainLoop();
+  }, 1000);
+};
+
 ipcMain.handle("START_STOP_BOT", async () => {
   if (!bot) {
     console.log("error with bot");
@@ -108,14 +119,14 @@ ipcMain.handle("START_STOP_BOT", async () => {
   }
   await bot.focusWindow();
   await bot.setRegion();
-  if (botLoop) {
+  if (continueRunning) {
     console.log("Stopping Bot");
+    continueRunning = false;
     bot.clearAllLoops();
     clearInterval(botLoop);
     botLoop = null;
     return;
   }
-  botLoop = setInterval(() => {
-    bot.runBot(currentDetection, clientData);
-  }, 1000);
+  continueRunning = true;
+  mainLoop();
 });
