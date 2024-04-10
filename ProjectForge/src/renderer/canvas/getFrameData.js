@@ -10,19 +10,16 @@ const getFrameData = async (imageCapture, canvasContext) => {
     // takes a frame from the video stream to send to the main thread
     const imageBitmap = await imageCapture.grabFrame();
     canvasContext.drawImage(imageBitmap, 0, 0);
+    const { height, width } = imageBitmap;
+    imageBitmap.close();
     // takes the imageData from the canvas
     const frameData = canvasContext.getImageData(
       0, //top left x
       0, //top right x
-      imageBitmap.width,
-      imageBitmap.height
+      width,
+      height
     );
-
-    return {
-      data: frameData.data,
-      width: frameData.width,
-      height: frameData.height,
-    };
+    return frameData;
   } catch (err) {
     console.log(err);
   }

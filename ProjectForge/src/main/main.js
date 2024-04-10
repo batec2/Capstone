@@ -64,7 +64,7 @@ const createBotWindow = () => {
 
 let currentDetection = null;
 const onBoundingBox = (filteredBoxes) => {
-  currentDetection = filteredBoxes;
+  // currentDetection = filteredBoxes;
 };
 
 let clientData = null;
@@ -82,7 +82,7 @@ app.whenReady().then(async () => {
   createWindow(iconPath);
   const window = await findWindow();
   bot = new Bot(window);
-  modelSocket.on("BOUNDING_BOX", onBoundingBox);
+  // modelSocket.on("BOUNDING_BOX", onBoundingBox);
   clientSocket.on("data", onGameTick);
 });
 
@@ -109,7 +109,7 @@ const mainLoop = () => {
   botLoop = setTimeout(() => {
     bot.runBot(currentDetection, clientData);
     mainLoop();
-  }, 1000);
+  }, 2000);
 };
 
 ipcMain.handle("START_STOP_BOT", async () => {

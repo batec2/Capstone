@@ -109,12 +109,17 @@ function App() {
   const handlePrediction = async () => {
     if (imageCapture.current) {
       if (!interval.current) {
+        // ************************THIS IS THE MEMORY LEAK*********************
+        let frame = null;
         interval.current = setInterval(async () => {
-          const frame = await getFrameData(
-            imageCapture.current,
-            dataContext.current
-          );
-          modelSocket.emit("image", frame);
+          frame = await getFrameData(imageCapture.current, dataContext.current);
+          // modelSocket.emit("image", {
+          //   data: frame.data,
+          //   width: frame.width,
+          //   height: frame.height,
+          // });
+          frame = null;
+          return;
         }, 1000);
         setIsPredicting(true);
       } else {
@@ -151,7 +156,7 @@ function App() {
     setData(JSON.parse(data));
   };
 
-  clientSocket.on("data", onData);
+  // clientSocket.on("data", onData);
 
   return (
     <div className="bg-red h-[900px]">

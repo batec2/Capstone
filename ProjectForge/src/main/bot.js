@@ -178,7 +178,7 @@ export class Bot {
 
   constructor(window) {
     this.window = window;
-    this.mouseSocket = io.connect("http://localhost:8000");
+    // this.mouseSocket = io.connect("http://localhost:8000");
   }
 
   get window() {
