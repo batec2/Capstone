@@ -20,7 +20,7 @@ io.on("connection", async (socket) => {
   console.log(socket.id);
   socket.on("image", (image) => {
     console.log("predicting...");
-    if (!image) {
+    if (!image || !image.data || image.data.length === 0) {
       return;
     }
     const frame = {
